@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+        <title>My 2D chat</title>
+        <link type="text/css" rel="stylesheet" media="all" href="style.css" />
+        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+        <script src="myclient.js"></script>
+        <script src="script.js"></script>
+    </head>
+    <body>
+        <div style="background-image: url('images/arcade.jpg');" id="login-page">
+            <!-- Login area where username and roomname are inputted -->
+            
+            <div class="on-join-div">
+              <div>
+                <h1>
+                  Choose your Avatar:
+                </h1>
+                <button style="background-color:white;" id="character-button1">
+                  <img
+                  src="images/u1.png"
+                  style="width: 64px; height: 128px"
+                  alt=""
+                  />
+                </button>
+                <button style="background-color:transparent;" id="character-button2">
+                  <img
+                  src="images/u2.png"
+                  style="width: 64px; height: 128px"
+                  alt=""
+                  />
+                </button>
+                <button style="background-color:transparent;" id="character-button3">
+                  <img
+                  src="images/u3.png"
+                  style="width: 64px; height: 128px"
+                  alt=""
+                  />
+                </button>
+                <button style="background-color:transparent;" id="character-button4">
+                  <img
+                  src="images/u4.png"
+                  style="width: 64px; height: 128px"
+                  alt=""
+                  />
+                </button>
+              </div>
+              <p id ="welcome-msg">Welcome to Virtual Chat 2D!</p>
+              <div class="chat_input join" style="order: 1">
+                <p style="order: 0; margin: 1%;">User Name</p>
+                <input type="text" id="on-join-input-userName" name="fname" style="order: 1"/>
+                <p style="order: 2; margin: 1%">User Password</p>
+                <input type="password" id="on-join-input-password" name="fname" style="order: 3"/>
+                <button class="buttons" id="send-button-join" role="button" style="order: 4">
+                  Enter
+                </button>
+              </div>
+            </div>
+        </div>
+        <div id="app-page">
+          <div id="canvas-container">
+            <canvas style="order:0;"></canvas>
+          </div>
+            <div class="chat-container" style="order:1;">
+                <!-- Chat are to send and receive messages -->
+                <div class="chat_area">
+                    <div class="chat_header" style="order: 0">
+                        <div class="profile_img" style="order: 0">
+                            <img
+                            src="images/pic01.jpg"
+                            style="width: 80px; height: 80px"
+                            alt=""
+                            />
+                        </div>
+                        <!-- <div class="profile_name" style="order: 1;">
+                            <p style="font-size: 25px" id="person_name"></p>
+                        </div> -->
+                        <div class="profile_info" style="display:flex; flex-direction:column;">
+                            <p id="chat-connected-msg" class="chat-info" style="order:0;"></p>
+                            <p id="chat-connected-msg-userID" class="chat-info" style="order:1;"></p>
+                            <p id="chat-connected-msg-userName" class="chat-info" style="order:2;"></p>
+                            <p id="chat-connected-msg-status" class="chat-info" style="order:3;"></p>
+                        </div>
+                    </div>
+                    <div class="chatroom" style="order: 1">
+                      <div class="chat_messages" id="chat_msg" style="order: 0">
+                      </div>
+                      <div class="chat_input" style="order: 1; margin-bottom: 5%">
+                        <input type="text" id="msg-input" name="fname" style="order: 0" />
+                        <button class="buttons" id="send_button" role="button" style="order: 1">
+                          Send
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+            </div>
+          </div>
+        <script src="room.js"></script>
+        <script src="myapp.js"></script>
+        <script src="code.js"></script>
+        <script> MYCHAT.init(); </script>
+    </body>
+</html>
