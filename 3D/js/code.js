@@ -28,7 +28,8 @@ function init()
 	//create camera
 	camera = new RD.Camera();
 	camera.perspective( 60, gl.canvas.width / gl.canvas.height, 0.1, 1000 );
-	camera.lookAt( [0,40,100],[0,20,0],[0,1,0] );
+	camera.lookAt([0,80,200],[0,20,0],[0,1,0] );
+	//camera.position = [32.2999999, 175.3000793, 315]; // init camera position
 
 	//global settings
 	var bg_color = [0.1,0.1,0.1,1];
@@ -55,8 +56,13 @@ function init()
 	girl.skeleton = new RD.Skeleton();
 	scene.root.addChild( girl_pivot );
 
-
+	character_pivot = girl_pivot;
 	character = girl;
+	//var material = new RD.Material({color: [1,0,1,1]});
+	//material.register("violet");
+	//var select_area = new RD.SceneNode({mesh: "cube", postion: [0,30,0], scaling: 10, material: "violet"});
+	//select_area.layers
+	//girl_pivot.addChild(select_area); // not working, shouyld move with the gitl
 
 	//load some animations
 	function loadAnimation( name, url )
@@ -69,9 +75,12 @@ function init()
 	loadAnimation("walking","data/girl/walking.skanim");
 	loadAnimation("dance","data/girl/dance.skanim");
 
+	// ROOM PART 
 	//load a GLTF for the room
-	var room = new RD.SceneNode({scaling:40});
-	room.loadGLTF("data/room.gltf");
+	var room = new RD.SceneNode({
+		scaling: 40,
+	});
+	room.loadGLTF("data/japanese_street_at_night/scene.gltf");
 	scene.root.addChild( room );
 
 	// main loop ***********************
@@ -82,6 +91,11 @@ function init()
 		gl.canvas.height = document.body.offsetHeight;
 		gl.viewport(0,0,gl.canvas.width,gl.canvas.height);
 
+
+		// How to make the camera follow the character
+		camera.lookAt(camera.position, character_pivot.localToGlobal(character.position), [0,1,0]); // ??
+		camera.perspective( 60, gl.canvas.width / gl.canvas.height, 0.1, 1000 );
+		camera.position[2] = character.position[2] + 200;
 		//clear
 		renderer.clear(bg_color);
 		//render scene
@@ -123,16 +137,20 @@ function init()
 
 	//user input ***********************
 
-	//detect clicks
+	// detect clicks
 	context.onmouseup = function(e)
 	{
 		if(e.click_time < 200) //fast click
 		{
 			//compute collision with floor plane
 			var ray = camera.getRay(e.canvasx, e.canvasy);
+			//var coll = vec3.create();
+			//scene.testRay(ray, coll, 1000, 0xFF, true);
 			if( ray.testPlane( RD.ZERO, RD.UP ) ) //collision
 			{
 				console.log( "floor position clicked", ray.collision_point );
+				//girl_pivot.position = ray.collision_point;
+				//character_pivot.orientTo(ray.collision_point, [0,1,0]);
 			}
 		}
 	}
@@ -170,3 +188,5 @@ function init()
 	sprite.updateMatrices();
 	sprite.flags.flipX = delta[0] < 0;
 */
+
+// when you get the message syou have to go to the node an dupdate the postion of the users

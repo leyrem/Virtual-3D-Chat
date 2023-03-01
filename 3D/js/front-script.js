@@ -19,13 +19,61 @@ const MYCHAT = {
     myUserSprite: 'images/spritesheet1.png',
     init: function()
     {
-      
+      // Join chat
+      $('#send-button-join').click(MYCHAT.logInChat);
+      $('#on-join-input-userName').on('keypress', function(e) {
+        if (e.which == 13) MYCHAT.logInChat();
+      });
+      $('#on-join-input-password').on('keypress', function(e) {
+        if (e.which == 13) MYCHAT.logInChat();
+      });
+
+      // Sign up
+      $('#signup-button-join').click(MYCHAT.goSignUpPage);
+
+      // Sign up chat
+      $('#send-button-signup').click(MYCHAT.signInChat);
+      $('#on-signup-input-userName').on('keypress', function(e) {
+        if (e.which == 13) MYCHAT.signInChat();
+      });
+      $('#on-signup-input-password').on('keypress', function(e) {
+        if (e.which == 13) MYCHAT.signInChat();
+      });
+
       // Send messages
       $('#send_button').click(MYCHAT.sendMessage);
       $('#msg-input').on('keypress', function(e) {
         if (e.which == 13) MYCHAT.sendMessage(false);
       });
   
+    },
+
+    logInChat: function()
+    {
+      const user_name = $('#on-join-input-userName').val();
+      const password = $('#on-join-input-password').val();
+      // If the input is empty, do not add
+      if (user_name =='' || password == '') return;
+
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('canvas-wrap').style.display = 'block';
+    },
+
+    goSignUpPage: function()
+    {
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('signup-page').style.display = 'block';
+    },
+
+    signInChat: function()
+    {
+      const user_name = $('#on-signup-input-userName').val();
+      const password = $('#on-signup-input-password').val();
+      // If the input is empty, do not add
+      if (user_name =='' || password == '') return;
+
+      document.getElementById('signup-page').style.display = 'none';
+      document.getElementById('canvas-wrap').style.display = 'block';
     },
   
     displayMessage: function( msg, side)

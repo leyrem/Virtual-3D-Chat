@@ -180,7 +180,7 @@ const MYCHAT = {
     MYCHAT.mapNamewithIRev.set(userName, userID);
     MYCHAT.sendSysMsg('User ' + userID + ' with user name: ' + userName + ',  connected!', userID, MYCHAT.currentTime());
 
-    var new_user = new User(userName);
+    //var new_user = new User(userName);
     new_user.id = userID;
     new_user.avatar = data.sprite;
     WORLD.addUser(new_user, MYAPP.current_room);

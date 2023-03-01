@@ -8,11 +8,6 @@
     height: 60%;
 }
 
-.chat_input.join {
-    border: 0;
-    font-size: 20px;
-    font-family: sans-serif;
-}
 
 .chat_input {
     background-color: #6a4a17;
@@ -131,7 +126,7 @@
     margin-right: auto;
   }
 
-  input {
+  #msg-input {
     margin:2%;
     align-self: center;
     width: 300px;
@@ -140,9 +135,85 @@
     border: #f4ca13;
     background-color: #f9e694;
   }
-  input[type=text] {
+  #msg-input[type=text] {
     width: 100%;
     padding: 12px 20px;
     margin: 8px 0;
     box-sizing: border-box;
   }
+  
+.on-join-div {
+  width: 50%;
+  margin-top: 15%;
+  margin-left: 24%;
+  color:white;
+  align-self: center;
+}
+
+
+.chat-input-join {
+  align-self: center;
+
+  border: 5px solid black;
+  border-radius: 10px;
+  background-color: white;
+  opacity: 0.90;
+  display: flex;
+  flex-direction: column;
+
+  padding: 30px;
+  padding-top: 0;
+  
+  font-size: 30px;
+  font-family: sans-serif;
+  color: black;
+}
+
+
+#on-join-input-userName, #on-join-input-password, #on-signup-input-password,  #on-signup-input-userName {
+  margin:2%;
+  align-self: center;
+  width: 300px;
+  height: 30px;
+  border-radius: 15px;
+}
+
+.login-inputs {
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+}
+
+#welcome-msg, #signup-msg {
+  align-self: center;
+  font-family: sans-serif;
+  font-weight: bold;
+  font-size: 40px;
+  color: black;
+}
+
+.enter-pages {
+  margin: auto;
+  padding: 10px;
+  background-color: rgb(25, 25, 25);
+  width:100%;
+  height:100%;
+}
+
+.on-join-div input {
+  border: 4px solid black;
+  background-color: rgb(224, 237, 249);
+}
+
+.on-join-div button {
+  border: 2px solid black;
+  background-color: rgb(111, 168, 248);
+}
+
+#signup-button-join {
+  border:0;
+  background-color: white;
+  color: blue;
+  text-decoration: underline;
+  font-size: 12px;
+} 
