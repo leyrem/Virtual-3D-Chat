@@ -4,7 +4,7 @@
     align-items: center;
     /* top: 50%;  */
     left:70%; 
-    bottom: 15%;
+    bottom: 8%;
     height: 60%;
 }
 
@@ -18,7 +18,7 @@
     height: 10%;
     width: 100%;
     padding:5%;
-    border: 2px solid #f4ca13;
+    border: 1px solid #f8e385;
     border-radius: 10px;
 }
 
@@ -132,8 +132,8 @@
     width: 300px;
     height: 30px;
     border-radius: 15px;
-    border: #f4ca13;
-    background-color: #f9e694;
+    border: 1px #f4ca13;
+    background-color: rgb(245, 235, 251);
   }
   #msg-input[type=text] {
     width: 100%;
@@ -154,7 +154,7 @@
 .chat-input-join {
   align-self: center;
 
-  border: 5px solid black;
+  /* border: 5px solid black; */
   border-radius: 10px;
   background-color: white;
   opacity: 0.90;
@@ -164,7 +164,7 @@
   padding: 30px;
   padding-top: 0;
   
-  font-size: 30px;
+  font-size: 20px;
   font-family: sans-serif;
   color: black;
 }
@@ -188,10 +188,13 @@
   align-self: center;
   font-family: sans-serif;
   font-weight: bold;
-  font-size: 40px;
+  font-size: 30px;
   color: black;
 }
 
+#welcome-msg {
+  margin: 0;
+}
 .enter-pages {
   margin: auto;
   padding: 10px;
@@ -201,12 +204,12 @@
 }
 
 .on-join-div input {
-  border: 4px solid black;
+  border: 1px solid black;
   background-color: rgb(224, 237, 249);
 }
 
 .on-join-div button {
-  border: 2px solid black;
+  border: 1px solid black;
   background-color: rgb(111, 168, 248);
 }
 
@@ -217,3 +220,35 @@
   text-decoration: underline;
   font-size: 12px;
 } 
+
+#choose-avatar-page {
+  overflow: none;
+  background-color: black;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  align-items: center;
+  padding-top :5%;
+  padding-left: 18%;
+  font-family: sans-serif;
+  color:white;
+}
+#choose-avatar {
+  width: 50%;
+  align-self: center;
+  display: flex;
+  flex-direction: row;
+}
+.character-buttons {
+  border: 10px black;
+}
+
+#avatar-select-button {
+  font-size: 10px;
+  height: 50px;
+  width:120px;
+  font-family: sans-serif;
+  background-color: rgb(182, 60, 231);
+  margin-top: 18%;
+  border: 0;
+}

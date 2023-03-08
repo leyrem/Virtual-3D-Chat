@@ -17,6 +17,7 @@ const MYCHAT = {
     // user ID
     myUserID: '',
     myUserSprite: 'images/spritesheet1.png',
+
     init: function()
     {
       // Join chat
@@ -40,6 +41,9 @@ const MYCHAT = {
         if (e.which == 13) MYCHAT.signInChat();
       });
 
+      // Choose avatar 
+      this.chooseAvatar();
+
       // Send messages
       $('#send_button').click(MYCHAT.sendMessage);
       $('#msg-input').on('keypress', function(e) {
@@ -56,7 +60,7 @@ const MYCHAT = {
       if (user_name =='' || password == '') return;
 
       document.getElementById('login-page').style.display = 'none';
-      document.getElementById('canvas-wrap').style.display = 'block';
+      MYCHAT.goSelectAvatar();
     },
 
     goSignUpPage: function()
@@ -73,10 +77,20 @@ const MYCHAT = {
       if (user_name =='' || password == '') return;
 
       document.getElementById('signup-page').style.display = 'none';
-      document.getElementById('canvas-wrap').style.display = 'block';
+      MYCHAT.goSelectAvatar();
+    },
+
+    goSelectAvatar: function()
+    {
+      document.getElementById('choose-avatar-page').style.display = 'block';
+
+      $('#avatar-select-button').click(function() {
+        document.getElementById('choose-avatar-page').style.display = 'none';
+        document.getElementById('canvas-wrap').style.display = 'block';
+      });
     },
   
-    displayMessage: function( msg, side)
+    displayMessage: function  ( msg, side )
     {
       if ( msg.type.toLowerCase() == 'text' ) {
         if ( msg.content != '' ) {
@@ -163,6 +177,48 @@ const MYCHAT = {
         time: time,
       };
       return msgObject;
+    },
+
+    chooseAvatar: function ()
+    {
+      //Select avatar
+  
+      var char1Button = document.getElementById("character-button1");
+      var char2Button = document.getElementById("character-button2");
+      var char3Button = document.getElementById("character-button3");
+      var char4Button = document.getElementById("character-button4");
+
+      char1Button.addEventListener("click",function (e) {
+        char1Button.style = "border: 1px solid white; border-radius: 10px; background-color: transparent;";
+        char2Button.style = "border: 0; background-color: transparent;";
+        char3Button.style = "border: 0; background-color: transparent;";
+        char4Button.style = "border: 0; background-color: transparent;";
+        MYCHAT.myUserSprite = 'images/spritesheet1.png';
+      });
+
+      char2Button.addEventListener("click",function (e) {
+        char1Button.style = "border: 0; background-color: transparent;";
+        char2Button.style = "border: 1px solid white; border-radius: 10px; background-color: transparent;";
+        char3Button.style = "border: 0; background-color: transparent;";
+        char4Button.style = "border: 0; background-color: transparent;";
+        MYCHAT.myUserSprite = 'images/spritesheet2.png';
+      });
+
+      char3Button.addEventListener("click",function (e) {
+        char1Button.style = "border: 0; background-color: transparent;";
+        char2Button.style = "border: 0; background-color: transparent;";
+        char3Button.style = "border: 1px solid white; border-radius: 10px; background-color: transparent;";
+        char4Button.style = "border: 0; background-color: transparent;";
+        MYCHAT.myUserSprite = 'images/spritesheet3.png';
+      });
+
+      char4Button.addEventListener("click",function (e) {
+        char1Button.style = "border: 0; background-color: transparent;";
+        char2Button.style = "border: 0; background-color: transparent;";
+        char3Button.style = "border: 0; background-color: transparent;";
+        char4Button.style = "border: 1px solid white; border-radius: 10px; background-color: transparent;";
+        MYCHAT.myUserSprite = 'images/spritesheet4.png';
+      });
     },
 
   };
