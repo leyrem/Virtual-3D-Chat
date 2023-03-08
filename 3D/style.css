@@ -1,13 +1,37 @@
 #canvas-wrap { position:relative } /* Make this a positioned parent */
+
 #overlay { 
-    position:absolute; 
-    align-items: center;
+    /* //position: absolute; 
+    align-items: center; */
     /* top: 50%;  */
-    left:70%; 
+    /* left: 70%; 
     bottom: 8%;
-    height: 60%;
+    height: 60%; */
 }
 
+#door-pop {
+  position: absolute;
+  left: 7%;
+  bottom: 80%;
+  border-radius: 10px;
+  
+  width: 70px; 
+  height: 40px; 
+  background-color: rgb(227, 179, 255);
+  color: white;
+  font-family: sans-serif;
+  font-size: 15px;
+  padding: 0.5%;
+}
+
+#enter-room-button {
+  background-color: #038da9;
+  border-radius: 10px;
+  border: 2px solid black;
+  border-width: 0 0 4px;
+  padding: 2%;
+  color: white;
+}
 
 .chat_input {
     background-color: #6a4a17;
@@ -41,7 +65,7 @@
     width: 30%;
 }
 
-.buttons:hover {
+ button:hover {
     filter: brightness(1.1);
 }
 
@@ -55,10 +79,13 @@
   }
 
 .chatroom {
+    position: absolute;
+    left: 70%;
+    bottom: 20%;
     font-family: sans-serif;
     display: flex;
     flex-direction: column;
-    height: 90%;
+    height: 60%;
 }
 
 .content {

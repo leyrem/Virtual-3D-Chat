@@ -13,11 +13,12 @@
 	<script type="text/javascript" src="js/extra/litegl.js"></script>
 	<script type="text/javascript" src="js/extra/rendeer.js"></script>
 	<script type="text/javascript" src="js/extra/wbin.js"></script>
+	<script type="text/javascript" src="js/extra/walkarea.js"></script>
 	<script type="text/javascript" src="js/code.js"></script>
-	<script type="text/javascript" src="js/front-script.js"></script>
+	<script type="text/javascript" src="js/myapp.js"></script>
 </head>
 <body>
-	<div style="background-image: url('images/back-mini.jpg'); display: block;" class="enter-pages" id="login-page">
+	<div style="background-image: url('images/back-mini.jpg'); display: none;" class="enter-pages" id="login-page">
 		<!-- Login area where username and roomname are inputted -->	
 		<div class="on-join-div" style="margin-top:15%">
 		  <div class="chat-input-join" style="order: 1;">
@@ -42,25 +43,25 @@
 		<div id="choose-avatar">
 			<button style="background-color: transparent; border: 1px solid white; border-radius: 10px;" id="character-button1" class="character-buttons">
 			  <img
-			  src="images/blur-char2.png"
+			  src="images/girl-pink.png"
 			  style="order: 0; width: 130px; height: 300px"
 			  />
 			</button>
 			<button style="background-color:transparent;" id="character-button2" class="character-buttons">
 			  <img
-			  src="images/blur-char2.png"
+			  src="images/bryce.png"
 			  style="order: 1; width: 130px; height: 300px"
 			  />
 			</button>
 			<button style="background-color:transparent;" id="character-button3" class="character-buttons">
 			  <img
-			  src="images/blur-char2.png"
+			  src="images/michelle.png"
 			  style="order: 2; width: 130px; height: 300px"
 			  />
 			</button>
 			<button style="background-color:transparent;" id="character-button4" class="character-buttons">
 			  <img
-			  src="images/blur-char2.png"
+			  src="images/james.png"
 			  style="order: 3; width: 130px; height: 300px"
 			  />
 			</button>
@@ -85,7 +86,7 @@
 			</div>
 		</div>
 	</div>
-	<div id="canvas-wrap" style="display: none;">
+	<div id="canvas-wrap" style="display: block;">
 		<div id="overlay" >
 			<div class="chatroom" style="order: 1">
 				<div class="chat_messages" id="chat_msg" style="order: 0"></div>
@@ -96,12 +97,17 @@
 				  </button>
 				</div>
 			</div>
+			<div id="door-pop" style="display: none;">
+				<button id="enter-room-button" role="button">
+					Click to enter room
+				  </button>
+			</div>
 		</div>
+		
 	</div>
-
 </body>
 <script>
 	init();
-	MYCHAT.init();
+	MYAPP.init();
 </script>
 </html>

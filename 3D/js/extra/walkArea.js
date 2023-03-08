@@ -104,7 +104,7 @@ WalkArea.prototype.adjustPosition = function(pos)
 		}
 	}
 
-	nearest[1] = pos[1]; //same Y
+	//nearest[1] = pos[1]; //same Y
 	return nearest;
 }
 
