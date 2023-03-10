@@ -51,6 +51,10 @@ const MYAPP = {
       // Enter room
       $('#enter-room-button').click(MYAPP.enterRoom);
   
+      $('#first-person-view-button').click(MYAPP.changeView);
+      $('#3rd-person-view-button').click(MYAPP.changeView);
+      $('#far-view-button').click(MYAPP.changeView);
+
     },
 
     logInChat: function()
@@ -94,7 +98,19 @@ const MYAPP = {
 
     startAPP: function() 
     {
+      fetch("./js/world.json").then(function(resp) {
+              return resp.json();
+          }).then(function(json) {
+              WORLD.fromJSON(json);
+              WORLD_3D.onWorldLoaded();
+              var room_name = WORLD.default_room;
+              //console.log("World JSON is: " +JSON.stringify(json));
 
+              // Connect to the server
+              //MYCHAT.connectServer(userName, room_name, password);
+          }).catch( function(error) {
+            console.log("Error fetching:" + error);
+          });
     },
   
     displayMessage: function  ( msg, side )
@@ -158,7 +174,7 @@ const MYAPP = {
       if (input == '') return;      
       
       //var nearUsers = MYAPP.getNearbyUsers();
-      var msgObj = MYAPP.createMsgObject('text', input, MYCHAT.myUser, MYCHAT.currentTime());
+      var msgObj = MYAPP.createMsgObject('text', input, MYAPP.myUser, MYAPP.currentTime());
       MYAPP.displayMessage(msgObj, "right");
   
       //MYAPP.my_user.lastMsg = {content:input,timeStamp:Date.now()/1000};
@@ -243,6 +259,25 @@ const MYAPP = {
     {
       document.getElementById('door-pop').style.display = 'none';
     },
+
+    changeView: function() {
+      console.log("e is: " + this.id);
+      if (this.id === "far-view-button") 
+      {
+        first_person_view = false
+        far_view = true
+      }
+      else if (this.id === "first-person-view-button")
+      {
+        far_view = false
+        first_person_view = true
+      }
+      else if (this.id === "3rd-person-view-button")
+      {
+        far_view = false
+        first_person_view = false
+      }
+    }
 
   };
   

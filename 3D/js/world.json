@@ -1,0 +1,110 @@
+{
+    "last_id": 2,
+    "default_room": "japanese_street",
+    "rooms": {
+        "japanese_street": 
+        {
+            "id": 0,
+            "name": "japanese_street",
+            "file3D": "data/japanese_street_at_night/scene.gltf",
+            "scaling": 40,
+            "people": [],
+            "walkarea": 
+            [
+                    {
+                        "init_pos": [-30, 0, -400],
+                        "height": 65,
+                        "width": 500
+                    },
+                    {
+                        "init_pos": [-30, 0, -400],
+                        "height": 150,
+                        "width": 85
+                    }
+            ],
+            "door_positions": [
+                {
+                    "target": "room1",
+                    "position": [35, 0, -84]
+                },
+                {
+                    "target": "room1",
+                    "position": [35, 0, -84]
+                },
+                {
+                    "target": "room1",
+                    "position": [35, 0, -84]
+                },
+                {
+                    "target": "room2",
+                    "position": [-30, 0, -59]
+                },
+                {
+                    "target": "room3",
+                    "position": [-35, 0, -137]
+                },
+                {
+                    "target": "room4",
+                    "position": [-30, 0, 43]
+                },
+                {
+                    "target": "room5",
+                    "position": [-30, 0, -225]
+                },
+                {
+                    "target": "room6",
+                    "position": [-30, 0, -277]
+                },
+                {
+                    "target": "room7",
+                    "position": [-30, 0, -323]
+                },
+                {
+                    "target": "room8",
+                    "position": [57, 0, -400]
+                },
+                {
+                    "target": "room9",
+                    "position": [-30, 0, -400]
+                },
+                {
+                    "target": "room10",
+                    "position": [33, 0, -272]
+                }
+            ],
+            "items": []
+        },
+        "abandoned_bar": 
+        {
+            "id": 1,
+            "name": "abandoned_bar",
+            "file3D": "data/abandoned_bar/scene.gltf",
+            "scaling": 40,
+            "people": [],
+            "walkarea": 
+            [
+                    {
+                        "init_pos": [-30, 0, -400],
+                        "height": 65,
+                        "width": 500
+                    },
+                    {
+                        "init_pos": [-30, 0, -400],
+                        "height": 150,
+                        "width": 85
+                    }
+            ],
+            "door_positions": [
+                {
+                    "target": "room1",
+                    "position": [35, 0, -84]
+                }
+            ],
+            "items": []
+        }
+    }
+}
+
+
+
+	
