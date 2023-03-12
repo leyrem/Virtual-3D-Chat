@@ -16,28 +16,12 @@ var cameras = [ // different camera positions
 	[100, 40, 100]
 ];
 
-var door_positions = [
-	[35, 0, -84],
-	[-30, 0, -59],
-	[-35, 0, -137],
-	[-30, 0, 43],
-	[-30, 0, -225],
-	[-30, 0, -277],
-	[-30, 0, -323],
-	[57, 0, -400],
-	[-30, 0, -400],
-	[33, 0, -272]
-];
-
-var walkarea = null;
-
-// On init, when i load the world from the json i should create all the scene nodes and store them somewhere,
-// then render stuff on the draw function
-
 var WORLD_3D = {
 	current_room: null,
     my_user: null,
 	scene: null,
+	current_room_walkarea: null,
+	current_anim: null,
 
 	onWorldLoaded: function() 
 	{
@@ -68,6 +52,10 @@ var WORLD_3D = {
 
 		//create a scene
 		this.scene = new RD.Scene();
+
+		// CANVAS---------------------------
+		//this.createSubCanvasVideo();
+		// -------------------------------
 
 		//create camera
 		camera = new RD.Camera();
@@ -114,10 +102,7 @@ var WORLD_3D = {
 
 		girl_pivot.addChild(girl_selector);
 
-		walkarea = new WalkArea(); // with addShape I can add all the vertices
-
-		walkarea.addRect([-30,0,-400], 65, 500); // you specify a corner and the height and witdh and it will crate the walkable area
-		walkarea.addRect([-30,0,-400], 150, 85)
+		this.setWalkArea();
 
 		character_pivot = girl_pivot;
 		character_pivot.rotate(180*DEG2RAD,[0,1,0]);
@@ -137,19 +122,20 @@ var WORLD_3D = {
 		}
 		loadAnimation("idle","data/" + avatar + "/idle.skanim");
 		loadAnimation("walking","data/" + avatar + "/walking.skanim");
-		//loadAnimation("dancing","data/" + avatar + "/dancing.skanim");
+		loadAnimation("dancing","data/" + avatar + "/dancing.skanim");
 		//loadAnimation("running","data/" + avatar + "/running.skanim");
-		//loadAnimation("waving","data/" + avatar + "/waving.skanim");
+		loadAnimation("waving","data/" + avatar + "/waving.skanim");
+		this.current_anim = animations.idle;
 
 		// ------- ROOM PART -----------
 
-		var room22 = new RD.SceneNode({
-			name: "a",
-			scaling: WORLD_3D.current_room.scaling,
-		});
-		room22.loadGLTF("data/abandoned_bar/scene.gltf");
-		this.scene.root.addChild( room22 );
-
+		//room22.loadGLTF("data/white_modern_living_room.glb"); scalng 40
+		//room22.loadGLTF("data/american_diner/scene.gltf"); scaling 1000
+		//room22.loadGLTF("data/american_diner2/scene.gltf"); scaing 1000
+		//room22.loadGLTF("data/american_diner3/scene.gltf");  scaling 16
+		//room22.loadGLTF("data/american_diner4/scene.gltf");  scaling 20
+		
+	
 		// load a GLTF for the room
 		var room = new RD.SceneNode({
 			name: WORLD_3D.current_room.name,
@@ -157,14 +143,6 @@ var WORLD_3D = {
 		});
 		room.loadGLTF(WORLD_3D.current_room.file3D);
 		this.scene.root.addChild( room );
-		
-		//this.scene.root.removeChild(room);
-
-		
-
-	
-		
-		
 
 		// ----------------- main loop ------------------------
 
@@ -220,7 +198,7 @@ var WORLD_3D = {
 			renderer.render(WORLD_3D.scene, camera, null, 0b11 ); // render nodes on the first 2 layers, not on the rest, useful for capturing clicks on characte or objects
 		
 			// Render walkable area
-			var vertices = walkarea.getVertices();
+			var vertices = WORLD_3D.current_room_walkarea.getVertices();
 			renderer.renderPoints( vertices, null, camera, null,null,null,gl.LINES );
 			//renderer.renderLines(vertices); // try and see if it works
 		}
@@ -232,7 +210,8 @@ var WORLD_3D = {
 			WORLD_3D.scene.update(dt);
 
 			var t = getTime();
-			var anim = animations.idle;
+			//var anim = animations.idle;
+			var anim = WORLD_3D.current_anim;
 			var time_factor = 1;
 
 			//control with keys
@@ -253,13 +232,18 @@ var WORLD_3D = {
 				character_pivot.rotate(-90*DEG2RAD*dt,[0,1,0]);
 
 			var pos = character_pivot.position;
-			var nearest_pos = walkarea.adjustPosition(pos); // adjusts pos inside walkable area defined above
+			var nearest_pos = WORLD_3D.current_room_walkarea.adjustPosition(pos); // adjusts pos inside walkable area defined above
 			character_pivot.position = nearest_pos;
 
 			var ret = WORLD_3D.isByDoor(character_pivot.position);
-			if (ret == true) 
-				MYAPP.showEnterRoom();
+			if (ret[0] == true) 
+				MYAPP.showEnterRoom(ret[1]);
 			else MYAPP.hideEnterRoom();
+
+			var ret2 = WORLD_3D.isByItem(character_pivot.position);
+			if(ret2[0] == true)
+				MYAPP.showItemInteraction(ret2[1]);
+			else MYAPP.hideItemInteraction();
 
 
 			// Setting walkable boundary manually 
@@ -329,8 +313,13 @@ var WORLD_3D = {
 		context.animate();
 	},
 
-	changeRoom: function( current_room, new_room )
+	changeRoom: function( current_room, new_room ) // new_room and current_room must be Room objects
 	{
+
+		if(current_room.name == "living_room") {
+			var n = WORLD_3D.scene.root.findNodeByName("subcanvas");
+			WORLD_3D.scene.root.removeChild(n);
+		}
 
 		var current_room_node = WORLD_3D.scene.root.findNodeByName(current_room.name);
 		WORLD_3D.scene.root.removeChild(current_room_node);
@@ -341,19 +330,97 @@ var WORLD_3D = {
 		});
 		new_room_node.loadGLTF(new_room.file3D);
 		WORLD_3D.scene.root.addChild( new_room_node );
+		WORLD_3D.current_room = new_room;
+		WORLD_3D.setWalkArea();
+
+		if (new_room.name == "living_room")
+		{
+			WORLD_3D.createSubCanvasVideo();
+		}
 	},
 
 	isByDoor: function( pos )
 	{
+		var door_positions = WORLD_3D.current_room.door_positions;
 		for (var i = 0; i < door_positions.length; i++)
 		{
-			if ((door_positions[i][0] - 3) <= Math.round(pos[0]) &&  Math.round(pos[0]) <= (door_positions[i][0] + 3) && (door_positions[i][2] - 3) <= Math.round(pos[2]) &&  Math.round(pos[2]) <= (door_positions[i][2] + 3) ) 
+			// if ((door_positions[i][0] - 3) <= Math.round(pos[0]) &&  Math.round(pos[0]) <= (door_positions[i][0] + 3) && (door_positions[i][2] - 3) <= Math.round(pos[2]) &&  Math.round(pos[2]) <= (door_positions[i][2] + 3) ) 
+			// {
+			// 	console.log("You are by door");
+			// 	return true;
+			// }
+			if ((door_positions[i].position[0] - 3) <= Math.round(pos[0]) &&  Math.round(pos[0]) <= (door_positions[i].position[0] + 3) && (door_positions[i].position[2] - 3) <= Math.round(pos[2]) &&  Math.round(pos[2]) <= (door_positions[i].position[2] + 3) ) 
 			{
-				console.log("You are by door");
-				return true;
+				//console.log("You are by door");
+				return [true, door_positions[i].target];
 			}
 		}	
-		return false;
+		return [false, null];
+	},
+
+	isByItem: function( pos )
+	{
+		var items = WORLD_3D.current_room.items;
+		for(var i = 0; i < items.length; i ++)
+		{
+			if ((items[i].position[0] - 3) <= Math.round(pos[0]) &&  Math.round(pos[0]) <= (items[i].position[0] + 3) && (items[i].position[2] - 3) <= Math.round(pos[2]) &&  Math.round(pos[2]) <= (items[i].position[2] + 3) ) 
+			{
+				//console.log("You are by door");
+				return [true, items[i].name];
+			}
+		}
+		return [false, null];
+	},
+
+	setWalkArea: function() // Every time is called, the walkarea is set of the current room, meant to be called after changing rooms
+	{
+
+		this.current_room_walkarea = new WalkArea(); // with addShape I can add all the vertices
+		for(var i = 0; i < WORLD_3D.current_room.walkarea.length; i ++)
+		{
+			var coords = WORLD_3D.current_room.walkarea[i];
+			this.current_room_walkarea.addRect(coords.init_pos, coords.height, coords.width);
+		}
+	},
+
+	createSubCanvasVideo: function()
+	{
+		//create an offscreen canvas where we will draw
+        var subcanvas = document.createElement("canvas");
+        subcanvas.width = 1800;
+        subcanvas.height = 1000;
+        var subctx = subcanvas.getContext("2d");
+        subctx.fillStyle = "white";
+        subctx.fillRect(0,0,subcanvas.width,subcanvas.height);
+        subctx.clearRect(2,2,subcanvas.width-4,subcanvas.height-4);
+
+		//create a texture to upload the offscreen canvas 
+        var texture = GL.Texture.fromImage(subcanvas, { wrap: gl.CLAMP_TO_EDGE });
+        gl.textures[":canvas"] = texture; //give it a name
+
+		//create a node
+		var panel = new RD.SceneNode({
+			name: "subcanvas",
+			mesh:"plane",
+			scale:[80,42,4],
+			position: [18,55,-97],
+			flags:{two_sided:true}
+		});
+		panel.texture = ":canvas"; //assign canvas texture to node
+		this.scene.root.addChild(panel);
+
+		var video = document.getElementById('video');
+
+		video.addEventListener('play', function() {
+			var $this = this; //cache
+			(function loop() {
+			  if (!$this.paused && !$this.ended) {
+				subctx.drawImage($this, 0, 0, 2000, 1000);
+				setTimeout(loop, 1000 / 30); // drawing at 30fps
+				texture.uploadImage(subcanvas);
+			  }
+			})();
+		  }, 0);
 	},
 
 }

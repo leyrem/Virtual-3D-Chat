@@ -15,6 +15,7 @@ const MYAPP = {
     // user ID
     myUserID: '',
     myAvatar: 'girl',
+    target_room: "",
 
     init: function()
     {
@@ -50,10 +51,17 @@ const MYAPP = {
 
       // Enter room
       $('#enter-room-button').click(MYAPP.enterRoom);
-  
+      // Music pop up
+      $('#item-button').click(MYAPP.startItemAction);
+      $('#btn-cancel').click(MYAPP.hideMusicPanel);
+      // view buttons
       $('#first-person-view-button').click(MYAPP.changeView);
       $('#3rd-person-view-button').click(MYAPP.changeView);
       $('#far-view-button').click(MYAPP.changeView);
+      // anim buttons
+      $('#dance-button').click(MYAPP.changeAnim);
+      $('#idle-button').click(MYAPP.changeAnim);
+      $('#wave-button').click(MYAPP.changeAnim);
 
     },
 
@@ -247,12 +255,18 @@ const MYAPP = {
     enterRoom: function()
     {
       document.getElementById('door-pop').style.display = 'none';
-      console.log("Enter room clicked");
+      var new_room = WORLD.rooms[target_room]
+      if (new_room === undefined) {
+        throw("Cannot change room as target room does not exist in WORLD");
+      }
+      WORLD_3D.changeRoom(WORLD_3D.current_room, new_room);
+      //console.log("Enter room clicked");
     },
 
-    showEnterRoom: function()
+    showEnterRoom: function(target_room_name)
     {
       document.getElementById('door-pop').style.display = 'block';
+      target_room = target_room_name;
     },
 
     hideEnterRoom: function()
@@ -260,8 +274,36 @@ const MYAPP = {
       document.getElementById('door-pop').style.display = 'none';
     },
 
+    showItemInteraction: function( name_item )
+    {     
+      
+      var el = document.getElementById("item-button");
+      if (name_item == "jukebox")
+        el.firstChild.data = "Click to play music";
+      else if (name_item == "tv")  
+        el.firstChild.data = "Click to play TV";
+      document.getElementById('item-pop').style.display = 'block';
+    },
+
+    hideItemInteraction: function()
+    {
+      document.getElementById('item-pop').style.display = 'none';
+    },
+
+    startItemAction: function()
+    {
+      if (document.getElementById("item-button").firstChild.data == "Click to play music")
+        document.getElementById('music-panel').style.display = 'block';
+      else if (document.getElementById("item-button").firstChild.data == "Click to play TV")
+        document.getElementById('video').play();
+    },
+    hideMusicPanel: function()
+    {
+      document.getElementById('music-panel').style.display = 'none';
+    },
+
     changeView: function() {
-      console.log("e is: " + this.id);
+      
       if (this.id === "far-view-button") 
       {
         first_person_view = false
@@ -277,7 +319,17 @@ const MYAPP = {
         far_view = false
         first_person_view = false
       }
-    }
+    },
+
+    changeAnim: function()
+    {
+      if (this.id == "dance-button")
+        WORLD_3D.current_anim = animations.dancing;
+      else if (this.id == "idle-button")
+        WORLD_3D.current_anim = animations.idle;
+      else if (this.id == "wave-button")
+        WORLD_3D.current_anim = animations.waving;
+    },
 
   };
   

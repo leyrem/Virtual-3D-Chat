@@ -99,9 +99,24 @@
 				</div>
 			</div>
 			<div id="door-pop" style="display: none;">
-				<button id="enter-room-button" role="button">
+				<button id="enter-room-button" class="pop-buttons" role="button">
 					Click to enter room
 				</button>
+			</div>
+			<div id="item-pop" style="display: none;">
+				<button id="item-button" class="pop-buttons" role="button">
+					Click to interact with item
+				</button>
+			</div>
+			<div class="music-popup" id="music-panel" style="display: none;">
+				<!-- <iframe 
+					style="border-radius:12px" 
+					src="https://open.spotify.com/embed/playlist/6UuXC6EPFgI73C3KsF92xB?utm_source=generator" 
+					width="100%" height="352" frameBorder="0" allowfullscreen="" 
+					allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+					loading="lazy">
+				</iframe> -->
+				<button type="button" id="btn-cancel">Close</button>
 			</div>
 			<div id="view-panel">
 				<button id="first-person-view-button" class="view-button" role="button" style="order: 0;">
@@ -114,9 +129,21 @@
 					Far View
 				</button>
 			</div>
+			<div id="anim-panel">
+				<button id="dance-button" class="view-button" role="button" style="order: 0;">
+					Dance
+				</button>
+				<button id="wave-button" class="view-button" role="button" style="order: 1;">
+					Wave
+				</button>
+				<button id="idle-button" class="view-button" role="button" style="order: 2;">
+					Idle
+				</button>
+			</div>
 		</div>
 		
 	</div>
+	<video id="video" src="vid.mp4" controls style="display: none;"></video>
 </body>
 <script>
 	//init();

@@ -24,83 +24,109 @@
             ],
             "door_positions": [
                 {
-                    "target": "room1",
+                    "target": "living_room",
                     "position": [35, 0, -84]
                 },
                 {
-                    "target": "room1",
-                    "position": [35, 0, -84]
-                },
-                {
-                    "target": "room1",
-                    "position": [35, 0, -84]
-                },
-                {
-                    "target": "room2",
+                    "target": "american_diner",
                     "position": [-30, 0, -59]
                 },
                 {
-                    "target": "room3",
+                    "target": "living_room",
                     "position": [-35, 0, -137]
                 },
                 {
-                    "target": "room4",
+                    "target": "living_room",
                     "position": [-30, 0, 43]
                 },
                 {
-                    "target": "room5",
+                    "target": "living_room",
                     "position": [-30, 0, -225]
                 },
                 {
-                    "target": "room6",
+                    "target": "living_room",
                     "position": [-30, 0, -277]
                 },
                 {
-                    "target": "room7",
+                    "target": "living_room",
                     "position": [-30, 0, -323]
                 },
                 {
-                    "target": "room8",
+                    "target": "living_room",
                     "position": [57, 0, -400]
                 },
                 {
-                    "target": "room9",
+                    "target": "living_room",
                     "position": [-30, 0, -400]
                 },
                 {
-                    "target": "room10",
+                    "target": "living_room",
                     "position": [33, 0, -272]
                 }
             ],
             "items": []
         },
-        "abandoned_bar": 
+        "living_room": 
         {
             "id": 1,
-            "name": "abandoned_bar",
-            "file3D": "data/abandoned_bar/scene.gltf",
+            "name": "living_room",
+            "file3D": "data/living_room.glb",
             "scaling": 40,
             "people": [],
             "walkarea": 
             [
                     {
-                        "init_pos": [-30, 0, -400],
-                        "height": 65,
-                        "width": 500
-                    },
-                    {
-                        "init_pos": [-30, 0, -400],
-                        "height": 150,
-                        "width": 85
+                        "init_pos": [0, 0, -76],
+                        "height": 100,
+                        "width": 130
                     }
             ],
             "door_positions": [
                 {
-                    "target": "room1",
-                    "position": [35, 0, -84]
+                    "target": "japanese_street",
+                    "position": [100, 0, -45]
                 }
             ],
-            "items": []
+            "items": [
+                {
+                    "name": "tv",
+                    "position": [14, 0, -76]
+                }
+            ]
+        },
+        "american_diner": 
+        {
+            "id": 2,
+            "name": "american_diner",
+            "file3D": "data/american_diner/scene.gltf",
+            "scaling": 900,
+            "people": [],
+            "walkarea": 
+            [
+                    {
+                        "init_pos": [-10, 0, -76],
+                        "height": 40,
+                        "width": 150
+                    },
+                    {
+                        "init_pos": [-70, 0, 40],
+                        "height": 100,
+                        "width": 60
+                    }
+            ],
+            "door_positions": [
+                {
+                    "target": "japanese_street",
+                    "position": [-70, 0, 70]
+                }
+            ],
+            "items": 
+            [
+                {
+                    "name": "jukebox",
+                    "position": [14, 0, -76]
+                }
+            ]
         }
     }
 }
