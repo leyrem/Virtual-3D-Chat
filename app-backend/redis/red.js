@@ -16,7 +16,7 @@ var REDIS_CLIENT = {
           console.log("[REDIS] Connected to Redis!");
           this.async_func = promisify(REDIS_CLIENT.redis_client.get).bind(REDIS_CLIENT.redis_client);
       });
-      //await this.redis_client.connect();
+      await this.redis_client.connect();
       
     } catch(err) {
       console.error("[REDIS] Error occurred while connecting to Redis local server: " + err);
@@ -34,14 +34,21 @@ var REDIS_CLIENT = {
     }
   },
 
+  my_get: async function(redisKey)  {
+    return this.redis_client.get(redisKey, (err, result) => {
+        return result;
+    });
+  },
+
   get_value_from_key: async function ( key )
   {
     try {
-      const val = await this.redis_client.async_func(key);
+      console.log("key is: "+ key);
+      //const val = await this.redis_client.async_func(key);
+      const val = await REDIS_CLIENT.my_get(key);
 
-      //load
       // await this.redis_client.get(key, function(err,v) {
-      //   console.log('name is ' + v);
+      //   console.log('v is ' + v);
       //   console.log("err is " + err)
       // });
 

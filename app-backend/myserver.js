@@ -1,4 +1,4 @@
-var Room = require('../public/room.js');
+var Room = require('../public-3D/js/world.js');
 var DATABASE_MANAGER = require('./credentials.js').DATABASE_MANAGER;
 var WORLD = Room.WORLD;
 const fs = require('fs');
@@ -22,7 +22,7 @@ var MYSERVER = {
         console.log("Initializing server...");
 		// TODO:
 		// Tengo un world en servidor y un world en cliente y hay que manternerlos synchornized
-		const data = fs.readFileSync('../public/world.json');
+		const data = fs.readFileSync('../public-3D/js/world.json');
 		WORLD.fromJSON(JSON.parse(data));
 		console.log("Number of rooms: " + Object.keys( WORLD.rooms ).length);
 	},
@@ -69,7 +69,9 @@ var MYSERVER = {
 		var sprite = sent_info[3];
 
 		// DEAL WITH PASSORD
+		console.log("1");
 		var ret = await DATABASE_MANAGER.login(user_name, password);
+		console.log("2");
 		if(ret == false) {
 			conn.sendToClient("AUTH", false);
 		  	return;
@@ -117,12 +119,14 @@ var MYSERVER = {
 			// Send ID to client and position
 			conn.sendToClient("USER_ID", pos_recv);
 		}  else {
-			conn.sendToClient("USER_ID", 0);
+			var def_pos = {pos: []};
+			def_pos.pos.push(-10);
+			def_pos.pos.push(0);
+			def_pos.pos.push(100);
+			conn.sendToClient("USER_ID", def_pos); // default position
 		}
 
 		console.log("[SERVER] Adding user to WORLD in room: " + room_s.name + ", on position: " + user.position);
-
-
 
         // send room info
 		this.sendRoomInfo(conn);
