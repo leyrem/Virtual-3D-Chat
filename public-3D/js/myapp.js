@@ -16,6 +16,7 @@ const MYAPP = {
     myUserID: '',
     myAvatar: 'girl',
     target_room: "",
+    my_language: "en",
 
     init: function()
     {
@@ -72,8 +73,10 @@ const MYAPP = {
       // If the input is empty, do not add
       if (user_name =='' || password == '') return;
 
+      MYAPP.myUser = user_name;
+
       document.getElementById('login-page').style.display = 'none';
-      MYAPP.goSelectAvatar();
+      MYAPP.goSelectAvatar(password);
     },
 
     goSignUpPage: function()
@@ -89,36 +92,136 @@ const MYAPP = {
       // If the input is empty, do not add
       if (user_name =='' || password == '') return;
 
+       MYAPP.myUser = user_name;
+
       document.getElementById('signup-page').style.display = 'none';
-      MYAPP.goSelectAvatar();
+      MYAPP.goSelectAvatar(password);
     },
 
-    goSelectAvatar: function()
+    goSelectAvatar: function(passwd)
     {
       document.getElementById('choose-avatar-page').style.display = 'block';
 
       $('#avatar-select-button').click(function() {
         document.getElementById('choose-avatar-page').style.display = 'none';
         document.getElementById('canvas-wrap').style.display = 'block';
-        MYAPP.startAPP();
+        MYAPP.startAPP(passwd);
       });
     },
 
-    startAPP: function() 
+    startAPP: function(password) 
     {
       fetch("./js/world.json").then(function(resp) {
               return resp.json();
           }).then(function(json) {
               WORLD.fromJSON(json);
-              WORLD_3D.onWorldLoaded();
               var room_name = WORLD.default_room;
+              WORLD_3D.current_room = WORLD.rooms[WORLD.default_room];
               //console.log("World JSON is: " +JSON.stringify(json));
 
               // Connect to the server
-              //MYCHAT.connectServer(userName, room_name, password);
+              MYAPP.connectServer(MYAPP.myUser, room_name, password);
           }).catch( function(error) {
             console.log("Error fetching:" + error);
           });
+    },
+
+    connectServer: function(userName, roomName, password)
+    {
+    
+      // server.connect( 'localhost:1337', roomName, userName);
+      //MYCLIENT.connect('ecv-etic.upf.edu/node/9018/ws', roomName, userName, password, this.myUserSprite);
+      MYCLIENT.connect('localhost:9018', roomName, userName, password, this.myAvatar);
+
+      MYCLIENT.on_connect = function( server ) {
+        alert("You are connected!"); // TODO: 
+        //$('#chat-connected-msg').html(`You are connected to room: ${roomName}`);
+        //$('#chat-connected-msg-status').html(`CONNECTED :)`);
+        //$('#add-chat-div').css('display', 'flex');
+      };
+
+      MYCLIENT.on_auth = function( is_valid ) {
+        if(is_valid == true) {
+          alert("Correct password");
+        } else {
+          alert("Incorrect password, try again!");
+          location.reload(); // Reload page
+        }
+      }
+      MYCLIENT.on_ready = function(id, pos_server) { //TODO: send user avatar, previous room
+        //$('#chat-connected-msg-userName').html(`Your userName is: ${userName}`);
+        //$('#chat-connected-msg-userID').html(`Your userID is: ${id}`);
+        MYAPP.myUserID = id;
+        MYAPP.mapNamewithIRev.set(userName, id);
+        // Callbacks
+        MYCLIENT.on_room_info = MYAPP.onRoomInfo;
+        MYCLIENT.on_user_connected = MYAPP.onUserConnect;
+        MYCLIENT.on_user_disconnected = MYAPP.onUserDisconnect;
+        MYCLIENT.on_message = MYAPP.onNewMessageReceived;
+        MYCLIENT.on_close = MYAPP.onClose;
+
+        // my user object
+        MYAPP.my_user_obj = new User(userName);
+        MYAPP.my_user_obj.id = id;
+        
+        //pos_server = JSON.parse( pos_server ); // TODO: send 3 coords[0,0,0]
+        console.log("pos server is: " + pos_server.pos);
+        MYAPP.my_user_obj.position = pos_server.pos;
+        //MYAPP.my_user_obj.target[0] = pos_server;
+        MYAPP.my_user_obj.avatar = MYAPP.myAvatar; // TODO: recoger del servidor
+        WORLD.addUser(MYAPP.my_user_obj, WORLD_3D.current_room); // TODO: set WORLD_3D current room a room enviada servidor
+        WORLD_3D.onWorldLoaded();
+      };
+    },
+
+    onRoomInfo: function ( room_info )
+    {
+      for (var i = 0; i < room_info.clients.length; i++ ) {
+        if (room_info.clients[i].user_id != MYAPP.myUserID) {
+
+            if (room_info.clients[i].user_name == MYAPP.myUser) {
+              alert("This user name is already logged in");
+              location.reload(); // Reload page
+            }
+          
+          // var new_user = new User(room_info.clients[i].user_name);
+          // new_user.id = room_info.clients[i].user_id;
+          // new_user.avatar = room_info.clients[i].user_sprite;
+          // new_user.position = room_info.clients[i].user_position;
+          // new_user.target[0] = room_info.clients[i].user_position;
+          // WORLD.addUser(new_user, MYAPP.current_room);
+          // MYCHAT.mapNamewithIRev.set(room_info.clients[i].user_name, room_info.clients[i].user_id);
+        }
+      } 
+    },
+    onUserConnect: function(userID, data)
+    {
+      var userName = data.username;
+      MYAPP.mapNamewithIRev.set(userName, userID);
+      MYAPP.sendSysMsg('User ' + userID + ' with user name: ' + userName + ',  connected!', userID, MYCHAT.currentTime());
+
+      //var new_user = new User(userName);
+      // new_user.id = userID;
+      // new_user.avatar = data.sprite;
+      // WORLD.addUser(new_user, MYAPP.current_room);
+    },
+
+    onUserDisconnect: function(userID, userName)
+    {
+      MYAPP.mapNamewithIRev.delete(userName);
+      MYAPP.sendSysMsg('User ' + userID + " with user name: " +  userName + " disconnected!", userID, MYCHAT.currentTime());
+      //WORLD.removeUser(WORLD.getUserById(userID));
+    },
+
+    onNewMessageReceived: function(authorID, msgStr)
+    {
+      MYAPP.displayMessage(JSON.parse(msgStr));
+    },
+
+    onClose: function()
+    {
+      alert("Server closed!");
+      location.reload(); // Reload page
     },
   
     displayMessage: function  ( msg, side )
@@ -332,5 +435,9 @@ const MYAPP = {
     },
 
   };
+
+
+// https://codepen.io/junior-abd-almaged/pen/gQEbRv  --> on message received pass it trhough translate, detect autoamtica language?
+// https://libretranslate.com/?source=auto&target=es&q=hello%250A
   
   

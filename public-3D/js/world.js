@@ -7,6 +7,7 @@ function User( name )
     this.room = "";
     this.position = [0, 0, 0];
     this.avatar = "girl";
+    this.avatar_scale = 0.3;
     this.lastMsg = {content: "", timeStamp: 0};
 }
 
