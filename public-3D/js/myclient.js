@@ -116,7 +116,7 @@ var MYCLIENT = {
         console.log("Processing server event, type: " + type + " , data: " + data);
         if (type == "CHAT_MSG") // user message received
         {
-            MYAPP.receiveMSG(data);
+            //MYAPP.receiveMSG(data); usado para mandar a los usuarios que estan cerca-- TODO:
             if(this.on_message)
                 this.on_message( author_id, data );
         }

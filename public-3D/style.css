@@ -177,7 +177,8 @@
   .sys {
     margin: auto;
     text-align: center;
-    background-color: aliceblue;
+    background-color: #05687c;
+    opacity: 1;
     border-radius: 10px;
   }
   .time {

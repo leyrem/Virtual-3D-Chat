@@ -47,7 +47,7 @@ const MYAPP = {
       // Send messages
       $('#send_button').click(MYAPP.sendMessage);
       $('#msg-input').on('keypress', function(e) {
-        if (e.which == 13) MYAPP.sendMessage(false);
+        if (e.which == 13) MYAPP.sendMessage();
       });
 
       // Enter room
@@ -194,28 +194,32 @@ const MYAPP = {
         }
       } 
     },
-    onUserConnect: function(userID, data)
+    onUserConnect: function(userID, data) // TODO: should receive position of user, and room where it is
     {
       var userName = data.username;
       MYAPP.mapNamewithIRev.set(userName, userID);
-      MYAPP.sendSysMsg('User ' + userID + ' with user name: ' + userName + ',  connected!', userID, MYCHAT.currentTime());
+      MYAPP.sendSysMsg('User ' + userID + ' with user name: ' + userName + ',  connected!', userID, MYAPP.currentTime());
 
-      //var new_user = new User(userName);
-      // new_user.id = userID;
-      // new_user.avatar = data.sprite;
-      // WORLD.addUser(new_user, MYAPP.current_room);
+      // new user
+      var new_user = new User(userName);
+      new_user.id = userID;
+      new_user.avatar = data.sprite;
+      new_user.position = [-10,0,100]; // TODO: get this from server
+
+      WORLD.addUser(new_user, WORLD_3D.current_room); // TODO: set WORLD_3D current room a room enviada servidor
+      WORLD_3D.addUserNode(false, new_user);
     },
 
     onUserDisconnect: function(userID, userName)
     {
       MYAPP.mapNamewithIRev.delete(userName);
-      MYAPP.sendSysMsg('User ' + userID + " with user name: " +  userName + " disconnected!", userID, MYCHAT.currentTime());
+      MYAPP.sendSysMsg('User ' + userID + " with user name: " +  userName + " disconnected!", userID, MYAPP.currentTime());
       //WORLD.removeUser(WORLD.getUserById(userID));
     },
 
     onNewMessageReceived: function(authorID, msgStr)
     {
-      MYAPP.displayMessage(JSON.parse(msgStr));
+      MYAPP.displayMessage(JSON.parse(msgStr), "left");
     },
 
     onClose: function()
@@ -237,7 +241,7 @@ const MYAPP = {
           textP.innerHTML = msg.content;
           var userP = document.createElement('p');
           userP.className = `user-name ${side}`;
-          if(side === "left") userP.innerHTML = msg.userName;
+          if (side === "left") userP.innerHTML = msg.userName;
           else userP.innerHTML = this.myUser;
           var timeP = document.createElement('p');
           timeP.className = `time ${side}`;
@@ -252,7 +256,6 @@ const MYAPP = {
         }
       } else if ( msg.type.toLowerCase() == 'sys' ) {
         if ( msg.content != '' ) {
-          MYAPP.selectedChange(1);
           // Create HTML for a system msg
           var contentDiv = document.createElement('div');
           var msgDiv = document.createElement('div');
@@ -293,6 +296,7 @@ const MYAPP = {
     //   if(nearUsers.length>0){
     //     MYCLIENT.sendPrivateMessage(JSON.stringify(msgObj), nearUsers);
     //   }
+      MYCLIENT.sendMessage(JSON.stringify(msgObj));
       $('#msg-input').val(''); // Reset the input value to empty text
     },
   
@@ -427,11 +431,11 @@ const MYAPP = {
     changeAnim: function()
     {
       if (this.id == "dance-button")
-        WORLD_3D.current_anim = animations.dancing;
+        WORLD_3D.current_anim = animations["dancing" + "_" + MYAPP.myAvatar];
       else if (this.id == "idle-button")
-        WORLD_3D.current_anim = animations.idle;
+        WORLD_3D.current_anim = animations["idle" + "_" + MYAPP.myAvatar];
       else if (this.id == "wave-button")
-        WORLD_3D.current_anim = animations.waving;
+        WORLD_3D.current_anim = animations["waving" + "_" + MYAPP.myAvatar];
     },
 
   };

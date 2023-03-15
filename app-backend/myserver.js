@@ -163,14 +163,14 @@ var MYSERVER = {
 
     onUserDisconnect: async function( conn )
     {
-        console.log("User disconnected");
+        console.log("[server] User disconnected");
         console.log('[server] Close socket of user_id: ' + conn.user_id);
 
 		if(!conn.user_id) return;
 		this.sendToRoom(conn.room_name, conn.user_id.toString(), true, "LOGOUT", conn.user_name, null);
 
 		// Storing the user's last position
-		await DATABASE_MANAGER.save_user_position(conn.user_name, conn.user.position);
+		await DATABASE_MANAGER.save_user_position(conn.user_name, conn.user.position); // TODO:  fix position here
 	
 		var room = this.rooms[conn.room_name];
 		if(room)

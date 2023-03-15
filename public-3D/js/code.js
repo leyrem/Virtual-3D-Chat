@@ -66,6 +66,13 @@ var WORLD_3D = {
 		this.init();
    	},
 
+	loadAnimation:  function ( name, avatar, url )
+	{
+		var anim = animations[name + "_" + avatar] = new RD.SkeletalAnimation();
+		anim.load(url);
+		return anim;
+	},
+
 	init: function()
 	{
 		//create the rendering context
@@ -98,25 +105,26 @@ var WORLD_3D = {
 		// var bg_color = [0.1,0.1,0.1,1];
 		//var avatar = "girl";
 		var avatar = MYAPP.myAvatar;
-		// var avatar_scale = 0.3; 
+		// // var avatar_scale = 0.3; 
+		// var avatar2 = "james";
 
-		//create material for the character
+		// //create material for the character
 		// var mat = new RD.Material({
 		// 	textures: {
-		// 	color: avatar + "/" + avatar + ".png" }
+		// 	color: avatar2 + "/" + avatar2 + ".png" }
 		// 	});
-		// mat.register(avatar);
+		// mat.register(avatar2);
 
 		// //create pivot point for the girl
 		// var girl_pivot = new RD.SceneNode({
 		// 	position: [-10,0,100] // init pos
 		// });
 
-		// //create a mesh for the girl
+		//create a mesh for the girl
 		// var girl = new RD.SceneNode({
-		// 	scaling: avatar_scale,
-		// 	mesh: avatar + "/" + avatar + ".wbin",
-		// 	material: avatar
+		// 	scaling: 0.3,
+		// 	mesh: avatar2 + "/" + avatar2 + ".wbin",
+		// 	material: avatar2
 		// });
 		// girl_pivot.addChild(girl);
 		// girl.skeleton = new RD.Skeleton();
@@ -146,18 +154,18 @@ var WORLD_3D = {
 		//girl_pivot.addChild(select_area); // not working, shouyld move with the gitl
 
 		//load some animations
-		function loadAnimation( name, url )
-		{
-			var anim = animations[name] = new RD.SkeletalAnimation();
-			anim.load(url);
-			return anim;
-		}
-		loadAnimation("idle","data/" + avatar + "/idle.skanim");
-		loadAnimation("walking","data/" + avatar + "/walking.skanim");
-		loadAnimation("dancing","data/" + avatar + "/dancing.skanim");
-		//loadAnimation("running","data/" + avatar + "/running.skanim");
-		loadAnimation("waving","data/" + avatar + "/waving.skanim");
-		this.current_anim = animations.idle;
+		// function loadAnimation( name, url )
+		// {
+		// 	var anim = animations[name] = new RD.SkeletalAnimation();
+		// 	anim.load(url);
+		// 	return anim;
+		// }
+		// loadAnimation("idle","data/" + avatar2 + "/idle.skanim");
+		// loadAnimation("walking","data/" + avatar2 + "/walking.skanim");
+		// loadAnimation("dancing","data/" + avatar2 + "/dancing.skanim");
+		// //loadAnimation("running","data/" + avatar + "/running.skanim");
+		// loadAnimation("waving","data/" + avatar2 + "/waving.skanim");
+		//this.current_anim = animations.idle;
 
 		// ------- ROOM PART -----------
 
@@ -250,12 +258,12 @@ var WORLD_3D = {
 			if(gl.keys["UP"])
 			{
 				WORLD_3D.my_character_pivot.moveLocal([0,0,1]);
-				anim = animations.walking;
+				anim = animations["walking" + "_" + MYAPP.myAvatar];
 			}
 			else if(gl.keys["DOWN"])
 			{
 				WORLD_3D.my_character_pivot.moveLocal([0,0,-1]);
-				anim = animations.walking;
+				anim = animations["walking" + "_" + MYAPP.myAvatar];
 				time_factor = -1;
 			}
 			if(gl.keys["LEFT"])
@@ -287,6 +295,18 @@ var WORLD_3D = {
 			anim.assignTime( t * 0.001 * time_factor );
 			//copy the skeleton in the animation to the character
 			WORLD_3D.my_character.skeleton.copyFrom( anim.skeleton );
+
+			for (var i = 0; i < WORLD.rooms[WORLD_3D.current_room.name].people.length; i ++) {
+				
+				var userID = WORLD.rooms[WORLD_3D.current_room.name].people[i];
+				if (userID != MYAPP.myUserID) {
+					var u = WORLD.getUserById(userID);
+					var n = WORLD_3D.scene.root.findNodeByName(u.name + "_char_node");
+					n.skeleton.copyFrom(animations["idle_" + u.avatar].skeleton);
+					//girl.skeleton.copyFrom(animations.idle.skeleton);
+				}
+			}
+			
 		}
 
 		//user input ***********************
@@ -349,6 +369,13 @@ var WORLD_3D = {
 	{
 		
 		var avatar = user_obj.avatar;
+
+		WORLD_3D.loadAnimation("idle", avatar, "data/" + avatar + "/idle.skanim");
+		WORLD_3D.loadAnimation("walking", avatar, "data/" + avatar + "/walking.skanim");
+		WORLD_3D.loadAnimation("dancing", avatar, "data/" + avatar + "/dancing.skanim");
+		//loadAnimation("running","data/" + avatar + "/running.skanim");
+		WORLD_3D.loadAnimation("waving", avatar, "data/" + avatar + "/waving.skanim");
+
 		//c reate material for the character
 		var mat = new RD.Material({
 			textures: {
@@ -358,25 +385,31 @@ var WORLD_3D = {
 
 		//create pivot point for the character
 		var char_pivot = new RD.SceneNode({
+			name: user_obj.name,
 			position: user_obj.position // init pos 
 		});
 
-		//create a mesh for the girl
+		//create a mesh for the character
 		var char = new RD.SceneNode({
+			name: user_obj.name + "_char_node",
 			scaling: user_obj.avatar_scale,
 			mesh: avatar + "/" + avatar + ".wbin",
 			material: avatar
 		});
-		char_pivot.addChild(char);
 		char.skeleton = new RD.Skeleton();
+		char_pivot.addChild(char);
+		
 		this.scene.root.addChild( char_pivot );
 
 		char_pivot.rotate(180*DEG2RAD,[0,1,0]);
 
-		if(is_mine) {
+		if (is_mine === true) {
 			WORLD_3D.my_character_pivot = char_pivot;
 			WORLD_3D.my_character = char;
+			WORLD_3D.current_anim = animations["idle" + "_" + avatar];
 		}
+
+		console.log("Added node to world 3d on pos: " + user_obj.position + " , with avatar: " + user_obj.avatar);
 
 		// var char_selector = new RD.SceneNode({
 		// 	position: [0, 20, 0],
