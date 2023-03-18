@@ -223,12 +223,13 @@ WBin.create = function( origin, origin_class_name )
 * @method WBin.load
 * @param {UInt8Array} data_array 
 * @param {bool} skip_classname avoid getting the instance of the class specified in classname, and get only the lumps
+* @param {String} filename [optional] the filename where this wbin came from (important to mark resources)
 * @return {*} Could be an Object with all the lumps or an instance to the class specified in the WBin data
 */
-WBin.load = function( data_array, skip_classname )
+WBin.load = function( data_array, skip_classname, filename )
 {
 	if(!data_array || ( data_array.constructor !== Uint8Array && data_array.constructor !== ArrayBuffer ) )
-		throw("WBin data must be ArrayBuffer or Uint8Array:", data_array);
+		throw("WBin data must be ArrayBuffer or Uint8Array");
 
 	//clone to avoid possible memory aligment problems
 	data_array = new Uint8Array(data_array);
@@ -281,7 +282,7 @@ WBin.load = function( data_array, skip_classname )
 			case "ArrayBuffer": lump_final = new Uint8Array(lump_data).buffer; break; //clone
 			default:
 				lump_data = new Uint8Array(lump_data); //clone to avoid problems with bytes alignment
-				var ctor = WBin.classes[ data_class_name ] || global[ data_class_name ];
+				var ctor = WBin.classes[ data_class_name ] || window[ data_class_name ];
 				if(!ctor)
 					throw("WBin referenced class not found: " + data_class_name );
 				if( (lump_data.length / ctor.BYTES_PER_ELEMENT)%1 != 0)
@@ -294,13 +295,13 @@ WBin.load = function( data_array, skip_classname )
 	//check if className exists, if it does use internal class parser
 	if(!skip_classname && header.classname)
 	{
-		var ctor = WBin.classes[ header.classname ] || global[ header.classname ];
+		var ctor = WBin.classes[ header.classname ] || window[ header.classname ];
 		if(ctor && ctor.fromBinary)
-			return ctor.fromBinary(object);
+			return ctor.fromBinary( object, filename );
 		else if(ctor && ctor.prototype.fromBinary)
 		{
 			var inst = new ctor();
-			inst.fromBinary(object);
+			inst.fromBinary( object, filename );
 			return inst;
 		}
 		else
@@ -428,24 +429,12 @@ WBin.readUint16 = function( buffer, pos )
 {
 	var dv = new DataView( buffer.buffer, buffer.byteOffset );
 	return dv.getUint16( pos, true );
-	/* this may be slow but helps removing Endian problems
-	var f = new Uint16Array(1);
-	var view = new Uint8Array(f.buffer);
-	view.set( buffer.subarray(pos,pos+2) );
-	return f[0];
-	*/
 }
 
 WBin.readUint32 = function(buffer, pos)
 {
 	var dv = new DataView( buffer.buffer, buffer.byteOffset);
 	return dv.getUint32( pos, true );
-	/*
-	var f = new Uint32Array(1);
-	var view = new Uint8Array(f.buffer);
-	view.set( buffer.subarray(pos,pos+4) );
-	return f[0];
-	*/
 }
 
 WBin.readFloat32 = function(buffer, pos)
@@ -454,46 +443,6 @@ WBin.readFloat32 = function(buffer, pos)
 	return dv.getFloat32( pos, true );
 }
 
-/* CANNOT BE DONE, XMLHTTPREQUEST DO NOT ALLOW TO READ PROGRESSIVE BINARY DATA (yet)
-//ACCORDING TO THIS SOURCE: http://chimera.labs.oreilly.com/books/1230000000545/ch15.html#XHR_STREAMING
-
-WBin.progressiveLoad = function(url, on_header, on_lump, on_complete, on_error)
-{
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-
-    //get binary format
-	xhr.responseType = "arraybuffer";
-  	xhr.overrideMimeType( "application/octet-stream" );
-
-    //get data as it arrives
-	xhr.onprogress = function(evt)
-    {
-		console.log(this.response); //this is null till the last packet
-		if (!evt.lengthComputable) return;
-		var percentComplete = Math.round(evt.loaded * 100 / evt.total);
-		//on_progress( percentComplete );
-    }
-
-    xhr.onload = function(load)
-	{
-		var response = this.response;
-		if(on_complete)
-			on_complete.call(this, response);
-	};
-    xhr.onerror = function(err) {
-    	console.error(err);
-		if(on_error)
-			on_error(err);
-	}
-	//start downloading
-    xhr.send();
-}
-*/
-
-//WBin is not registered in LS here, because WBin is included before LS
-//IT is done from LS
-
 global.WBin = WBin;
 
-})(this);
+})( typeof(global) != "undefined" ? global : this );

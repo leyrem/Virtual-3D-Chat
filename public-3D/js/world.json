@@ -24,7 +24,7 @@
             ],
             "door_positions": [
                 {
-                    "target": "living_room",
+                    "target": "abandoned_bar",
                     "position": [35, 0, -84]
                 },
                 {
@@ -127,6 +127,53 @@
                     "position": [14, 0, -76]
                 }
             ]
+        },
+        "abandoned_bar": 
+        {
+            "id": 3,
+            "name": "abandoned_bar",
+            "file3D": "data/abandoned_bar__tavern.glb",
+            "scaling": 30,
+            "people": [],
+            "walkarea": 
+            [
+                    {
+                        "init_pos": [-205, 0, -12],
+                        "height": 70,
+                        "width": 40
+                    },
+                    {
+                        "init_pos": [-150, 0, -40],
+                        "height": 70,
+                        "width": 85
+                    },
+                    {
+                        "init_pos": [-80, 0, -40],
+                        "height": 60,
+                        "width": 160
+                    },
+                    {
+                        "init_pos": [100, 0, -20],
+                        "height": 100,
+                        "width": 90
+                    },
+                    {
+                        "init_pos": [-20, 0, -110],
+                        "height": 120,
+                        "width": 230
+                    }
+            ],
+            "door_positions": [
+                {
+                    "target": "japanese_street",
+                    "position": [200, 0, 51]
+                },
+                {
+                    "target": "japanese_street",
+                    "position": [-205, 0, 4]
+                }
+            ],
+            "items": []
         }
     }
 }

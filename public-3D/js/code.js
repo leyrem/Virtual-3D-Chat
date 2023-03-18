@@ -313,6 +313,7 @@ var WORLD_3D = {
 				if (userID != MYAPP.myUserID) {
 					var u = WORLD.getUserById(userID);
 					var n = WORLD_3D.scene.root.findNodeByName(u.name + "_char_node");
+					if (n == null) continue; 
 					n.skeleton.copyFrom(animations[u.current_anim].skeleton);
 
 					WORLD_3D.scene.root.findNodeByName(u.name).position = u.position;

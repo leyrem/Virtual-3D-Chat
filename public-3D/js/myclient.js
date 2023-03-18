@@ -184,10 +184,11 @@ var MYCLIENT = {
                 var other = parsedMsg.people[i];
                 var user = WORLD.getUserById(other.id);
                 if (user) { // user is in the world already
-                    console.log("[Client] Updating user json");
+                    //console.log("[Client] Updating user json");
                     user.fromJSON(other); // update user with info just received
 
                     var user_node = WORLD_3D.scene.root.findNodeByName(user.name);
+                    if (user_node == null) throw("Node is null");
                     user_node.rotation = user.rotation;
                     user_node.position = user.position;
 
