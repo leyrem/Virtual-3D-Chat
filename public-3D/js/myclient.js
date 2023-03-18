@@ -113,7 +113,7 @@ var MYCLIENT = {
 
     processServerEvent: function ( author_id, type, data, parsedMsg )
     {
-        console.log("Processing server event, type: " + type + " , data: " + data);
+        //console.log("Processing server event, type: " + type + " , data: " + data);
         if (type == "CHAT_MSG") // user message received
         {
             //MYAPP.receiveMSG(data); usado para mandar a los usuarios que estan cerca-- TODO:
@@ -169,26 +169,33 @@ var MYCLIENT = {
 
             if(this.on_room_info)
                 this.on_room_info( room_info );
+
         } else if (type == "UPDATE") // data is user
         {
             var user = data;
 
-            if(user.id === this.user_id) return;
+            if (user.id === this.user_id) return;
             var room = WORLD.getRoom(user.room);
-            if(room) {
-                MYAPP.current_room = room; 
+            if (room) {
+               MYAPP.current_room = room; //TODO: do this?
             }
             for (var i = 0; i < parsedMsg.people.length; i++) 
             {
                 var other = parsedMsg.people[i];
                 var user = WORLD.getUserById(other.id);
-                if(user) { // user is in the world already
-                    console.log("Updating user json");
+                if (user) { // user is in the world already
+                    console.log("[Client] Updating user json");
                     user.fromJSON(other); // update user with info just received
+
+                    var user_node = WORLD_3D.scene.root.findNodeByName(user.name);
+                    user_node.rotation = user.rotation;
+                    user_node.position = user.position;
+
                 } else { // user is not in the world
-                    user = new User(other.name); // TODO: other.name or user.name here ?
-                    user.fromJSON(other);
-                    WORLD.addUser( user, room);
+                    // TODO: do this
+                    // user = new User(other.name); // TODO: other.name or user.name here ?
+                    // user.fromJSON(other);
+                    // WORLD.addUser( user, room);
                     //room.addUser(user);
                 }
             }

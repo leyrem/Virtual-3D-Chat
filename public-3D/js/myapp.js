@@ -183,6 +183,17 @@ const MYAPP = {
               alert("This user name is already logged in");
               location.reload(); // Reload page
             }
+
+            // new user
+            var new_user = new User(room_info.clients[i].user_name);
+            new_user.id = room_info.clients[i].user_id;
+            new_user.avatar = room_info.clients[i].user_sprite;
+            new_user.position = [-10,0,100];//room_info.clients[i].user_position; // TODO: get this from server
+
+            WORLD.addUser(new_user, WORLD_3D.current_room); // TODO: set WORLD_3D current room a room enviada servidor
+            WORLD_3D.addUserNode(false, new_user);
+
+            MYAPP.mapNamewithIRev.set(room_info.clients[i].user_name, room_info.clients[i].user_id); // TODO: DELETE 
           
           // var new_user = new User(room_info.clients[i].user_name);
           // new_user.id = room_info.clients[i].user_id;
@@ -214,7 +225,8 @@ const MYAPP = {
     {
       MYAPP.mapNamewithIRev.delete(userName);
       MYAPP.sendSysMsg('User ' + userID + " with user name: " +  userName + " disconnected!", userID, MYAPP.currentTime());
-      //WORLD.removeUser(WORLD.getUserById(userID));
+      WORLD.removeUser(WORLD.getUserById(userID));
+      WORLD_3D.removeUserNode(WORLD.getUserById(userID));
     },
 
     onNewMessageReceived: function(authorID, msgStr)
@@ -431,11 +443,11 @@ const MYAPP = {
     changeAnim: function()
     {
       if (this.id == "dance-button")
-        WORLD_3D.current_anim = animations["dancing" + "_" + MYAPP.myAvatar];
+        WORLD_3D.current_anim = "dancing" + "_" + MYAPP.myAvatar;
       else if (this.id == "idle-button")
-        WORLD_3D.current_anim = animations["idle" + "_" + MYAPP.myAvatar];
+        WORLD_3D.current_anim = "idle" + "_" + MYAPP.myAvatar;
       else if (this.id == "wave-button")
-        WORLD_3D.current_anim = animations["waving" + "_" + MYAPP.myAvatar];
+        WORLD_3D.current_anim = "waving" + "_" + MYAPP.myAvatar;
     },
 
   };

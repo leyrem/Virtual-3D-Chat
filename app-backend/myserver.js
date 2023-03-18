@@ -10,7 +10,7 @@ var queryString = require('querystring'),
 
 var MYSERVER = {
     clients: {},
-    rooms: {}, // or {} ??
+    rooms: {}, 
     DB: {msgs: []},
     last_id: 1, // ID to assing to new users
     MAX_BUFFER: 100,// Max number of messages that can be buffered
@@ -29,9 +29,8 @@ var MYSERVER = {
 
     onReady: function() 
     {
-		// TODO: llamar esta fucnion en main ?? 
         console.log("Server is ready!");
-		//this.interval = setInterval(MYSERVER.onTick.bind(MYSERVER), 1000 / 10 ); // 10 times per second
+		this.interval = setInterval(MYSERVER.onTick.bind(MYSERVER), 1000 / 10 ); // 10 times per second
 	},
 
     onUserConnect: async function( conn, req_url )
@@ -198,17 +197,19 @@ var MYSERVER = {
 
 		if(msgReceived.createNewRoom) {
 			this.changeRoom(msgReceived.msgData);
-		} else if(JSON.parse(msgReceived.msgData).type == "movement"){
+		} else if(JSON.parse(msgReceived.msgData).type == "UPDATE_STATE") {
 			// UPDATE WORLD SERVER INSTANCE
 
-			ws.user.position =  JSON.parse(msgReceived.msgData).content;
-			ws.user.target[0] =  JSON.parse(msgReceived.msgData).content;
+			var dat = JSON.parse(msgReceived.msgData);
+			ws.user.position =  dat.pos;
+			ws.user.current_anim = dat.anim;
+			ws.user.rotation = dat.rot;
 
-			WORLD.users[ws.user_name].position = JSON.parse(msgReceived.msgData).content;
-			WORLD.users[ws.user_name].target[0] = JSON.parse(msgReceived.msgData).content;
-			//var user_p = WORLD.getUserById(ws.user_id);
-            //WORLD.changeUserTarget(user_p, JSON.parse(msgReceived.msgData).content);
-			this.sendToRoom(ws.room_name, ws.user_id.toString(), msgReceived.isSentToAll, "movement", msgReceived.msgData, msgReceived.target);
+			WORLD.users[ws.user_name].position = dat.pos;
+			WORLD.users[ws.user_name].current_anim = dat.anim;
+			WORLD.users[ws.user_name].rotation = dat.rot;
+
+			//this.sendToRoom(ws.room_name, ws.user_id.toString(), msgReceived.isSentToAll, "movement", msgReceived.msgData, msgReceived.target);
 		} else {
 			this.sendToRoom(ws.room_name, ws.user_id.toString(), msgReceived.isSentToAll, "CHAT_MSG", msgReceived.msgData, msgReceived.target);
 		}
@@ -318,15 +319,16 @@ var MYSERVER = {
 		}
 	},
 	sendRoomState: function(room, connection)
-	{ // I have to send info to the client about his state and the state of the room he is in 
+	{
 		// Sending the state to every user in the room
 		var user = connection.user;
-		// TODO: hacer este mensaje conforme a mi protocolo
+
+		// SEND positioN, rotation,animation_name
 
 		var data = {
 			user_id: "server",
 			type: "UPDATE",
-			data: user, // TODO:send the whole user obj?
+			data: user, 
 			people: []
 		};
 		for(var i = 0; i < room.people.length; i ++ )

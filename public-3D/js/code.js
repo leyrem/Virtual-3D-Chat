@@ -251,19 +251,23 @@ var WORLD_3D = {
 
 			var t = getTime();
 			//var anim = animations.idle;
-			var anim = WORLD_3D.current_anim;
+			var anim = animations[WORLD_3D.current_anim];
 			var time_factor = 1;
+
+			var anim_name = WORLD_3D.current_anim;
 
 			//control with keys
 			if(gl.keys["UP"])
 			{
 				WORLD_3D.my_character_pivot.moveLocal([0,0,1]);
-				anim = animations["walking" + "_" + MYAPP.myAvatar];
+				anim_name = "walking" + "_" + MYAPP.myAvatar;
+				anim = animations[anim_name];
 			}
 			else if(gl.keys["DOWN"])
 			{
 				WORLD_3D.my_character_pivot.moveLocal([0,0,-1]);
-				anim = animations["walking" + "_" + MYAPP.myAvatar];
+				anim_name = "walking" + "_" + MYAPP.myAvatar;
+				anim = animations[anim_name];
 				time_factor = -1;
 			}
 			if(gl.keys["LEFT"])
@@ -296,16 +300,27 @@ var WORLD_3D = {
 			//copy the skeleton in the animation to the character
 			WORLD_3D.my_character.skeleton.copyFrom( anim.skeleton );
 
+			WORLD.getUserById(MYAPP.myUserID).rotation = WORLD_3D.my_character_pivot.rotation;
+			WORLD.getUserById(MYAPP.myUserID).position = WORLD_3D.my_character_pivot.position;
+			WORLD.getUserById(MYAPP.myUserID).current_anim = anim_name;
+
+			var msg = {pos:  WORLD_3D.my_character_pivot.position, rot:  WORLD_3D.my_character_pivot.rotation, anim: anim_name, type:"UPDATE_STATE"};
+			if (MYCLIENT.on_connect != null) MYCLIENT.sendMessage(JSON.stringify(msg));
+
 			for (var i = 0; i < WORLD.rooms[WORLD_3D.current_room.name].people.length; i ++) {
 				
 				var userID = WORLD.rooms[WORLD_3D.current_room.name].people[i];
 				if (userID != MYAPP.myUserID) {
 					var u = WORLD.getUserById(userID);
 					var n = WORLD_3D.scene.root.findNodeByName(u.name + "_char_node");
-					n.skeleton.copyFrom(animations["idle_" + u.avatar].skeleton);
-					//girl.skeleton.copyFrom(animations.idle.skeleton);
+					n.skeleton.copyFrom(animations[u.current_anim].skeleton);
+
+					WORLD_3D.scene.root.findNodeByName(u.name).position = u.position;
+					WORLD_3D.scene.root.findNodeByName(u.name).rotation = u.rotation;
 				}
 			}
+
+
 			
 		}
 
@@ -365,6 +380,14 @@ var WORLD_3D = {
 		WORLD_3D.context.animate();
 	},
 
+	removeUserNode: function(user_obj) 
+	{
+		
+		var user_node = WORLD_3D.scene.root.findNodeByName(user_obj.name);
+		WORLD_3D.scene.root.removeChild(user_node);
+	
+	},
+
 	addUserNode: function(is_mine, user_obj)
 	{
 		
@@ -406,7 +429,7 @@ var WORLD_3D = {
 		if (is_mine === true) {
 			WORLD_3D.my_character_pivot = char_pivot;
 			WORLD_3D.my_character = char;
-			WORLD_3D.current_anim = animations["idle" + "_" + avatar];
+			WORLD_3D.current_anim = "idle" + "_" + avatar;
 		}
 
 		console.log("Added node to world 3d on pos: " + user_obj.position + " , with avatar: " + user_obj.avatar);

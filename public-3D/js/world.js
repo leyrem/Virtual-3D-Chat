@@ -9,6 +9,8 @@ function User( name )
     this.avatar = "girl";
     this.avatar_scale = 0.3;
     this.lastMsg = {content: "", timeStamp: 0};
+    this.current_anim = "idle_girl";
+    this.rotation = new Float32Array([0, 0, 0, 0]);
 }
 
 User.prototype.fromJSON = function( json )
@@ -16,7 +18,6 @@ User.prototype.fromJSON = function( json )
     for(var i in json)
     {
         this[i] = json[i]; // update every variable in the User instance
-        console.log()
     }
 }
 
