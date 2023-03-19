@@ -40,7 +40,7 @@ var MYSERVER = {
         // Assing callbacks to client connection
         conn.sendToClient = function( type, data ) {
             console.log("[server] Sending " + type + " to client, data is: " + data);
-			if(type == "AUTH") {
+			if (type == "AUTH") {
 				var msgT = { 
 					user_id: "non",
 					type: type,
@@ -66,19 +66,47 @@ var MYSERVER = {
 		var user_name = sent_info[1];
 		const password = sent_info[2];
 		var sprite = sent_info[3];
+		const is_sign_up = sent_info[4];
 
+		
 		// DEAL WITH PASSORD
-		console.log("1");
+		if (is_sign_up == "false") {
+			var res = await DATABASE_MANAGER.check_user_in_db(user_name);
+			if (res == false) {
+				console.log("[Server] uknown user, has to sign up first");
+				conn.sendToClient("AUTH", {ret: false, msg: "Username is not registered, you need to signup first"}); // Means the user has to signup first
+				return;
+			}
+		}
+
+		if (is_sign_up == "true") {
+			var res = await DATABASE_MANAGER.check_user_in_db(user_name);
+			if (res == true) {
+				console.log("[Server] User is trying to sign up with already existing username");
+				conn.sendToClient("AUTH", {ret: false, msg: "User with that username already exists"}); // Means the user has to signup with another user name
+				return;
+			}
+			// Save the avatar of the user if the user is signing up for the first time
+			await DATABASE_MANAGER.save_user_avatar(user_name, sprite);
+		}
+		
 		var ret = await DATABASE_MANAGER.login(user_name, password);
-		console.log("2");
-		if(ret == false) {
-			conn.sendToClient("AUTH", false);
+		if (ret == false) {
+			conn.sendToClient("AUTH", {ret: false, msg: "Incorrect password"});
 		  	return;
 		}
-		conn.sendToClient("AUTH", true);
+		conn.sendToClient("AUTH", {ret: true, msg: ""});
+		// Get the user avatar and send it to user when the user logs in again
+		var u_avatar = await DATABASE_MANAGER.get_user_avatar(user_name);
+		if (u_avatar != null) sprite = u_avatar;
 
         // Assing room_name to client connection
 		conn.room_name = room_name.substr(1, room_name.length); //strip the dash
+
+		// Get the last room the user was in when he/she logged out previously
+		var room_name_stored = await DATABASE_MANAGER.get_user_room(user_name);
+		if (room_name_stored != null) conn.room_name = room_name_stored;
+
         // Assing ID to client connection
         conn.user_id = this.last_id;
         this.last_id++;
@@ -111,21 +139,18 @@ var MYSERVER = {
 		WORLD.addUser( conn.user, room_s );
 
 		var pos_recv = await DATABASE_MANAGER.get_user_position(conn.user_name);
-		if(pos_recv != null){
-			// TODO: do this?
-			//if(pos_recv >= 100 ) pos_recv = 99;
-			//if(pos_recv <= -100) pos_recv = -99;
-			// Send ID to client and position
-			conn.sendToClient("USER_ID", pos_recv);
+		if (pos_recv != null) {
+			// Send ID to client and position and avatar and room
+			var previous_data = { pos: JSON.parse(pos_recv), avatar: sprite, previous_room: conn.room_name};
+			conn.user.position = JSON.parse(pos_recv);
+			conn.sendToClient("USER_ID", previous_data);
 		}  else {
-			var def_pos = {pos: []};
-			def_pos.pos.push(-10);
-			def_pos.pos.push(0);
-			def_pos.pos.push(100);
-			conn.sendToClient("USER_ID", def_pos); // default position
+			var def_data = { pos: [-10, 0, 100], avatar: sprite, previous_room: conn.room_name };
+			conn.user.position = [-10,0,100];
+			conn.sendToClient("USER_ID", def_data); // default position
 		}
 
-		console.log("[SERVER] Adding user to WORLD in room: " + room_s.name + ", on position: " + user.position);
+		//console.log("[SERVER] Adding user to WORLD in room: " + room_s.name + ", on position: " + user.position);
 
         // send room info
 		this.sendRoomInfo(conn);
@@ -165,11 +190,14 @@ var MYSERVER = {
         console.log("[server] User disconnected");
         console.log('[server] Close socket of user_id: ' + conn.user_id);
 
-		if(!conn.user_id) return;
+		if (!conn.user_id) return;
 		this.sendToRoom(conn.room_name, conn.user_id.toString(), true, "LOGOUT", conn.user_name, null);
 
 		// Storing the user's last position
-		await DATABASE_MANAGER.save_user_position(conn.user_name, conn.user.position); // TODO:  fix position here
+		await DATABASE_MANAGER.save_user_position(conn.user_name, JSON.stringify(conn.user.position)); 
+
+		// Storing the user's last room
+		await DATABASE_MANAGER.save_user_room(conn.user_name, conn.room_name); 
 	
 		var room = this.rooms[conn.room_name];
 		if(room)
@@ -183,10 +211,10 @@ var MYSERVER = {
 
     },
 
-    onUserMessage: function( ws, msg )
+    onUserMessage: async function( ws, msg )
     {
         const msgReceived = JSON.parse(msg);
-		console.log(" [server] (onUserMessage) MSG received: ", msgReceived);
+		//console.log(" [server] (onUserMessage) MSG received: ", msgReceived);
         // MSGS received sent by client are like this:
 			// newMsg = {
 				// createNewRoom: true/false
@@ -195,10 +223,12 @@ var MYSERVER = {
 			// 	msgData: msg
 			// }
 
-		if(msgReceived.createNewRoom) {
+		if (msgReceived.createNewRoom) 
+		{
 			this.changeRoom(msgReceived.msgData);
-		} else if(JSON.parse(msgReceived.msgData).type == "UPDATE_STATE") {
-			// UPDATE WORLD SERVER INSTANCE
+		} 
+		else if(JSON.parse(msgReceived.msgData).type == "UPDATE_STATE") 
+		{
 
 			var dat = JSON.parse(msgReceived.msgData);
 			ws.user.position =  dat.pos;
@@ -209,8 +239,20 @@ var MYSERVER = {
 			WORLD.users[ws.user_name].current_anim = dat.anim;
 			WORLD.users[ws.user_name].rotation = dat.rot;
 
-			//this.sendToRoom(ws.room_name, ws.user_id.toString(), msgReceived.isSentToAll, "movement", msgReceived.msgData, msgReceived.target);
-		} else {
+		} 
+		else if(JSON.parse(msgReceived.msgData).type == "AVATAR_CHANGE")
+		{
+			var new_avatar = JSON.parse(msgReceived.msgData).new_avatar;
+			ws.user.avatar = new_avatar;
+			ws.user.current_anim = "idle_" + new_avatar;
+			ws.sprite = new_avatar;
+			WORLD.users[ws.user_name].avatar = new_avatar;
+			await DATABASE_MANAGER.save_user_avatar(ws.user_name, new_avatar);
+			console.log("Aout to save");
+			this.sendToRoom(ws.room_name, ws.user_id.toString(), true, "UPDATE_AVATAR", msgReceived.msgData, null);
+		}
+		else 
+		{
 			this.sendToRoom(ws.room_name, ws.user_id.toString(), msgReceived.isSentToAll, "CHAT_MSG", msgReceived.msgData, msgReceived.target);
 		}
     },
@@ -294,8 +336,10 @@ var MYSERVER = {
 
 		client_conn.room_name = data.new_room_name;
 
+		console.log("sending room info");
 		// Inform all users in the new joined room a new user just joined
 		this.sendRoomInfo(client_conn);
+		console.log("sending login info");
 		// Send client the info of the room he/she just joined
 		this.sendLoginInfo(client_conn);
 

@@ -15,7 +15,7 @@ var MYCLIENT = {
     on_user_disconnected: null,
     on_auth: null,
 
-    connect: function( url, room_name, user_name, password, spriteURL ) 
+    connect: function( url, room_name, user_name, password, spriteURL, is_sign_up ) 
     {
         if(!url)
             throw("You must specify the server URL of the server");
@@ -49,7 +49,7 @@ var MYCLIENT = {
         }
 
         var protocol = "ws://";
-        var final_url = protocol + url + "/" + room_name + "+" + user_name + "+" + password + "+"+spriteURL;
+        var final_url = protocol + url + "/" + room_name + "+" + user_name + "+" + password + "+" + spriteURL + "+" + is_sign_up;
         this.socket = new WebSocket(final_url);
         this.socket.onopen = this.onOpen.bind(this); 
         this.socket.onclose = this.onClose.bind(this);
@@ -113,7 +113,7 @@ var MYCLIENT = {
 
     processServerEvent: function ( author_id, type, data, parsedMsg )
     {
-        //console.log("Processing server event, type: " + type + " , data: " + data);
+        if(type != "UPDATE")console.log("Processing server event, type: " + type + " , data: " + data);
         if (type == "CHAT_MSG") // user message received
         {
             //MYAPP.receiveMSG(data); usado para mandar a los usuarios que estan cerca-- TODO:
@@ -177,7 +177,7 @@ var MYCLIENT = {
             if (user.id === this.user_id) return;
             var room = WORLD.getRoom(user.room);
             if (room) {
-               MYAPP.current_room = room; //TODO: do this?
+               //WORLD_3D.current_room = room; //TODO: do this?
             }
             for (var i = 0; i < parsedMsg.people.length; i++) 
             {
@@ -188,7 +188,7 @@ var MYCLIENT = {
                     user.fromJSON(other); // update user with info just received
 
                     var user_node = WORLD_3D.scene.root.findNodeByName(user.name);
-                    if (user_node == null) throw("Node is null");
+                    if (user_node == null) continue;
                     user_node.rotation = user.rotation;
                     user_node.position = user.position;
 
@@ -200,11 +200,14 @@ var MYCLIENT = {
                     //room.addUser(user);
                 }
             }
-        }else if(type == "movement") // Indicates a user moved
+        } else if(type == "UPDATE_AVATAR") // Indicates a user changed its avatar
         {
             var msg = JSON.parse(data); 
             var user = WORLD.getUserById(author_id);
-            WORLD.changeUserTarget(user, msg.content);
+            WORLD_3D.removeUserNode(user);
+            user.avatar = msg.new_avatar;
+            user.current_anim = "idle_" + msg.new_avatar;
+            WORLD_3D.addUserNode(false, user);
 
         } else if (type == "AUTH") {
 

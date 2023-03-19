@@ -64,6 +64,8 @@ const MYAPP = {
       $('#idle-button').click(MYAPP.changeAnim);
       $('#wave-button').click(MYAPP.changeAnim);
 
+      // avatar button
+      $('#avatar-button').click(MYAPP.changeAvatar);
     },
 
     logInChat: function()
@@ -76,7 +78,8 @@ const MYAPP = {
       MYAPP.myUser = user_name;
 
       document.getElementById('login-page').style.display = 'none';
-      MYAPP.goSelectAvatar(password);
+      document.getElementById('canvas-wrap').style.display = 'block';
+      MYAPP.startAPP(password, false);
     },
 
     goSignUpPage: function()
@@ -95,21 +98,21 @@ const MYAPP = {
        MYAPP.myUser = user_name;
 
       document.getElementById('signup-page').style.display = 'none';
-      MYAPP.goSelectAvatar(password);
+      MYAPP.goSelectAvatar(password, true);
     },
 
-    goSelectAvatar: function(passwd)
+    goSelectAvatar: function(passwd, is_start)
     {
       document.getElementById('choose-avatar-page').style.display = 'block';
 
       $('#avatar-select-button').click(function() {
         document.getElementById('choose-avatar-page').style.display = 'none';
         document.getElementById('canvas-wrap').style.display = 'block';
-        MYAPP.startAPP(passwd);
+        if (is_start == true) MYAPP.startAPP(passwd, true);
       });
     },
 
-    startAPP: function(password) 
+    startAPP: function(password, is_sign_up) 
     {
       fetch("./js/world.json").then(function(resp) {
               return resp.json();
@@ -120,35 +123,36 @@ const MYAPP = {
               //console.log("World JSON is: " +JSON.stringify(json));
 
               // Connect to the server
-              MYAPP.connectServer(MYAPP.myUser, room_name, password);
+              MYAPP.connectServer(MYAPP.myUser, room_name, password, is_sign_up);
           }).catch( function(error) {
             console.log("Error fetching:" + error);
           });
     },
 
-    connectServer: function(userName, roomName, password)
+    connectServer: function(userName, roomName, password, is_sign_up)
     {
     
       // server.connect( 'localhost:1337', roomName, userName);
       //MYCLIENT.connect('ecv-etic.upf.edu/node/9018/ws', roomName, userName, password, this.myUserSprite);
-      MYCLIENT.connect('localhost:9018', roomName, userName, password, this.myAvatar);
+      MYCLIENT.connect('localhost:9018', roomName, userName, password, this.myAvatar, is_sign_up);
 
       MYCLIENT.on_connect = function( server ) {
-        alert("You are connected!"); // TODO: 
+        //alert("You are connected!"); // TODO: 
         //$('#chat-connected-msg').html(`You are connected to room: ${roomName}`);
         //$('#chat-connected-msg-status').html(`CONNECTED :)`);
         //$('#add-chat-div').css('display', 'flex');
       };
 
-      MYCLIENT.on_auth = function( is_valid ) {
-        if(is_valid == true) {
+      MYCLIENT.on_auth = function( data ) {
+        console.log("INSIDE AUTH");
+        if (data.ret == true) {
           alert("Correct password");
         } else {
-          alert("Incorrect password, try again!");
+          alert(data.msg);
           location.reload(); // Reload page
         }
       }
-      MYCLIENT.on_ready = function(id, pos_server) { //TODO: send user avatar, previous room
+      MYCLIENT.on_ready = function(id, data) { //TODO: send user avatar, previous room
         //$('#chat-connected-msg-userName').html(`Your userName is: ${userName}`);
         //$('#chat-connected-msg-userID').html(`Your userID is: ${id}`);
         MYAPP.myUserID = id;
@@ -162,13 +166,12 @@ const MYAPP = {
 
         // my user object
         MYAPP.my_user_obj = new User(userName);
-        MYAPP.my_user_obj.id = id;
-        
-        //pos_server = JSON.parse( pos_server ); // TODO: send 3 coords[0,0,0]
-        console.log("pos server is: " + pos_server.pos);
-        MYAPP.my_user_obj.position = pos_server.pos;
-        //MYAPP.my_user_obj.target[0] = pos_server;
-        MYAPP.my_user_obj.avatar = MYAPP.myAvatar; // TODO: recoger del servidor
+        MYAPP.my_user_obj.id = parseInt(id);
+        MYAPP.my_user_obj.room = data.previous_room;
+        MYAPP.my_user_obj.position = data.pos;
+        MYAPP.my_user_obj.avatar = data.avatar; 
+        MYAPP.myAvatar = data.avatar;
+        WORLD_3D.current_room = WORLD.rooms[data.previous_room];
         WORLD.addUser(MYAPP.my_user_obj, WORLD_3D.current_room); // TODO: set WORLD_3D current room a room enviada servidor
         WORLD_3D.onWorldLoaded();
       };
@@ -186,9 +189,9 @@ const MYAPP = {
 
             // new user
             var new_user = new User(room_info.clients[i].user_name);
-            new_user.id = room_info.clients[i].user_id;
+            new_user.id = parseInt(room_info.clients[i].user_id);
             new_user.avatar = room_info.clients[i].user_sprite;
-            new_user.position = [-10,0,100];//room_info.clients[i].user_position; // TODO: get this from server
+            new_user.position = room_info.clients[i].user_position; // TODO: get this from server
 
             WORLD.addUser(new_user, WORLD_3D.current_room); // TODO: set WORLD_3D current room a room enviada servidor
             WORLD_3D.addUserNode(false, new_user);
@@ -378,6 +381,8 @@ const MYAPP = {
       if (new_room === undefined) {
         throw("Cannot change room as target room does not exist in WORLD");
       }
+      MYCLIENT.changeRoom(new_room.name);
+      WORLD.changeRoom(WORLD.getUserById(MYAPP.myUserID), new_room);
       WORLD_3D.changeRoom(WORLD_3D.current_room, new_room);
       //console.log("Enter room clicked");
     },
@@ -448,6 +453,30 @@ const MYAPP = {
         WORLD_3D.current_anim = "idle" + "_" + MYAPP.myAvatar;
       else if (this.id == "wave-button")
         WORLD_3D.current_anim = "waving" + "_" + MYAPP.myAvatar;
+    },
+
+    changeAvatar: function()
+    {
+      document.querySelector('#avatar-select-button').onclick = () => {};
+
+      document.getElementById('choose-avatar-page').style.display = 'block';
+      document.getElementById('canvas-wrap').style.display = 'none';
+      $('#avatar-select-button').click(function() {
+
+        
+        WORLD_3D.removeUserNode(MYAPP.my_user_obj);
+        MYAPP.my_user_obj.avatar = MYAPP.myAvatar;
+        MYAPP.my_user_obj.current_anim = "idle_" + MYAPP.myAvatar;
+        WORLD_3D.addUserNode(true, MYAPP.my_user_obj);
+
+        var msg = {new_avatar: MYAPP.myAvatar, type: "AVATAR_CHANGE"};
+			  if (MYCLIENT.on_connect != null) MYCLIENT.sendMessage(JSON.stringify(msg));
+
+
+        document.getElementById('choose-avatar-page').style.display = 'none';
+        document.getElementById('canvas-wrap').style.display = 'block';
+        console.log("[App] New avatar selected: " + MYAPP.myAvatar);
+      });
     },
 
   };

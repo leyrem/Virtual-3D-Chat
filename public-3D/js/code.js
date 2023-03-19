@@ -60,6 +60,26 @@ var WORLD_3D = {
 		//global settings
 		WORLD_3D.bg_color = [0.1,0.1,0.1,1];
 
+		WORLD_3D.loadAnimation("idle", "james", "data/james/idle.skanim");
+		WORLD_3D.loadAnimation("walking", "james", "data/james/walking.skanim");
+		WORLD_3D.loadAnimation("dancing", "james", "data/james/dancing.skanim");
+		WORLD_3D.loadAnimation("waving", "james", "data/james/waving.skanim");
+
+		WORLD_3D.loadAnimation("idle", "bryce", "data/bryce/idle.skanim");
+		WORLD_3D.loadAnimation("walking", "bryce", "data/bryce/walking.skanim");
+		WORLD_3D.loadAnimation("dancing", "bryce", "data/bryce/dancing.skanim");
+		WORLD_3D.loadAnimation("waving", "bryce", "data/bryce/waving.skanim");
+
+		WORLD_3D.loadAnimation("idle", "girl", "data/girl/idle.skanim");
+		WORLD_3D.loadAnimation("walking", "girl", "data/girl/walking.skanim");
+		WORLD_3D.loadAnimation("dancing", "girl", "data/girl/dancing.skanim");
+		WORLD_3D.loadAnimation("waving", "girl", "data/girl/waving.skanim");
+
+		WORLD_3D.loadAnimation("idle", "yellow-girl", "data/yellow-girl/idle.skanim");
+		WORLD_3D.loadAnimation("walking", "yellow-girl", "data/yellow-girl/walking.skanim");
+		WORLD_3D.loadAnimation("dancing", "yellow-girl", "data/yellow-girl/dancing.skanim");
+		WORLD_3D.loadAnimation("waving", "yellow-girl", "data/yellow-girl/waving.skanim");
+
 
 		//console.log("Current room is: " + JSON.stringify(this.current_room));
 		WORLD_3D.addUserNode(true, MYAPP.my_user_obj);
@@ -314,6 +334,9 @@ var WORLD_3D = {
 					var u = WORLD.getUserById(userID);
 					var n = WORLD_3D.scene.root.findNodeByName(u.name + "_char_node");
 					if (n == null) continue; 
+					if (u.current_anim == null) continue;
+					if (animations[u.current_anim] == null || animations[u.current_anim] === undefined) continue;
+
 
 					animations[u.current_anim].assignTime( t * 0.001 * time_factor );
 					n.skeleton.copyFrom(animations[u.current_anim].skeleton);
@@ -342,7 +365,7 @@ var WORLD_3D = {
 				//scene.testRay(ray, coll, 1000, 0xFF, true);
 				if( ray.testPlane( RD.ZERO, RD.UP ) ) //collision
 				{
-					console.log( "floor position clicked", ray.collision_point );
+					//console.log( "floor position clicked", ray.collision_point );
 					//girl_pivot.position = ray.collision_point;
 					WORLD_3D.my_character_pivot.orientTo(ray.collision_point, true, [0,1,0], false, true);
 				}
@@ -396,12 +419,6 @@ var WORLD_3D = {
 		
 		var avatar = user_obj.avatar;
 
-		WORLD_3D.loadAnimation("idle", avatar, "data/" + avatar + "/idle.skanim");
-		WORLD_3D.loadAnimation("walking", avatar, "data/" + avatar + "/walking.skanim");
-		WORLD_3D.loadAnimation("dancing", avatar, "data/" + avatar + "/dancing.skanim");
-		//loadAnimation("running","data/" + avatar + "/running.skanim");
-		WORLD_3D.loadAnimation("waving", avatar, "data/" + avatar + "/waving.skanim");
-
 		//c reate material for the character
 		var mat = new RD.Material({
 			textures: {
@@ -435,22 +452,29 @@ var WORLD_3D = {
 			WORLD_3D.current_anim = "idle" + "_" + avatar;
 		}
 
+		var char_selector = new RD.SceneNode({
+			position: [0, 20, 0],
+			mesh: "cube",
+			material: avatar,
+			scaling: [8,40,8],
+			name: user_obj.name + "_selector",
+			layers: 0b1000 // 4th layer
+		});
+
+		char_pivot.addChild(char_selector);
+
+		
 		console.log("Added node to world 3d on pos: " + user_obj.position + " , with avatar: " + user_obj.avatar);
-
-		// var char_selector = new RD.SceneNode({
-		// 	position: [0, 20, 0],
-		// 	mesh: "cube",
-		// 	material: avatar,
-		// 	scaling: [8,20,8],
-		// 	name: "girl_selector",
-		// 	layers: 0b1000 // 4th layer
-		// });
-
-		// girl_pivot.addChild(girl_selector);
 	},
 
 	changeRoom: function( current_room, new_room ) // new_room and current_room must be Room objects
 	{
+
+		for(var i = 0; i < WORLD.rooms[current_room.name].people.length; i++) {
+			var user_id = WORLD.rooms[current_room.name].people[i];
+			if (user_id == MYAPP.myUserID) continue;
+			WORLD_3D.removeUserNode(WORLD.getUserById(user_id));
+		}
 
 		if(current_room.name == "living_room") {
 			var n = WORLD_3D.scene.root.findNodeByName("subcanvas");

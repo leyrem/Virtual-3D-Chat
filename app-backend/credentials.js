@@ -39,10 +39,17 @@ var DATABASE_MANAGER = {
         await REDIS_CLIENT.set_key_value("users:" + user_name, hashed_pss);
     },
 
+    check_user_in_db: async function(user_name)
+    {
+        var ret = await REDIS_CLIENT.get_value_from_key("users:" + user_name);
+        if (ret == null) return false;
+        else return true;
+    },
+
     login: async function( user_name, passwd )
     {
         var ret = await REDIS_CLIENT.get_value_from_key("users:" + user_name);
-        if(ret == null) {
+        if (ret == null) {
             console.log(`[DB MANAGER] User ${user_name} not in DB, adding it`);
             this.set_user_password(user_name, passwd);
             return true;
@@ -60,7 +67,7 @@ var DATABASE_MANAGER = {
         if(position == null)
             throw("Cannot save position of user because position is null");
 
-        await REDIS_CLIENT.set_key_value("users:" + user_name + ":postion", position);
+        await REDIS_CLIENT.set_key_value("users:" + user_name + ":position", position);
     },
 
     get_user_position: async function( user_name )
@@ -68,7 +75,43 @@ var DATABASE_MANAGER = {
         if(user_name == null)
             throw("Cannot save position of user because user_name is null");
             
-        return await REDIS_CLIENT.get_value_from_key("users:" + user_name + ":postion");
+        return await REDIS_CLIENT.get_value_from_key("users:" + user_name + ":position");
+    },
+
+    save_user_avatar: async function(user_name, avatar)
+    {
+        if (user_name == null)
+            throw("Cannot save position of user because user_name is null");
+        if (avatar == null)
+            throw("Cannot save position of user because position is null");
+
+        await REDIS_CLIENT.set_key_value("users:" + user_name + ":avatar", avatar);
+    },
+
+    get_user_avatar: async function(user_name)
+    {
+        if (user_name == null)
+            throw("Cannot save position of user because user_name is null");
+            
+        return await REDIS_CLIENT.get_value_from_key("users:" + user_name + ":avatar");
+    },
+
+    save_user_room: async function(user_name, room_name)
+    {
+        if (user_name == null)
+            throw("Cannot save position of user because user_name is null");
+        if (room_name == null)
+            throw("Cannot save position of user because position is null");
+
+        await REDIS_CLIENT.set_key_value("users:" + user_name + ":room_name", room_name);
+    },
+
+    get_user_room: async function(user_name)
+    {
+        if (user_name == null)
+            throw("Cannot save position of user because user_name is null");
+            
+        return await REDIS_CLIENT.get_value_from_key("users:" + user_name + ":room_name");
     },
 
 }

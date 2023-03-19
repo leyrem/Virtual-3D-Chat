@@ -43,7 +43,7 @@ var REDIS_CLIENT = {
   get_value_from_key: async function ( key )
   {
     try {
-      console.log("key is: "+ key);
+      //console.log("key is: "+ key);
       //const val = await this.redis_client.async_func(key);
       const val = await REDIS_CLIENT.my_get(key);
 
