@@ -74,9 +74,11 @@
 			  style="order: 3; width: 130px; height: 300px"
 			  />
 			</button>
-			<button class="buttons" role="button" id="avatar-select-button">
-				Let's Go!
-			</button>
+			<div class="btn-group" style="height: 50px; margin-top: 18%;">
+				<button id="avatar-select-button">
+					Let's Go!
+				</button>
+			</div>
 		  </div>
 	</div>
 	<div style="background-image: url('images/back-mini.jpg'); display: none;"  class="enter-pages" id="signup-page">
@@ -97,19 +99,44 @@
 	</div>
 	<div id="canvas-wrap" style="display: none;">
 		<div id="overlay" >
+			<div class="card">
+				
+			  </div>
+			  <div class="card2">
+				<h3 style="order:0; margin:1%;">Status</h3>
+				<div class="card3 cont" style="order:1; left: 10%; top: 15%;"><p id="bar-status"></p></div>
+				<h3 style="order:2; margin:1%;">User Name</h3>
+				<div class="card3"  style="order: 3;left: 40%; top: 25%;"><p id="bar-username"></p> </div>
+				<h3 style="order:4; margin:1%;">Room Name</h3>
+				<div class="card3" style="order:5;  left: 40%; top: 35%;"><p id="bar-roomname"></p> </div>
+			  </div>
 			<div class="chatroom" style="order: 1">
 				<div class="chat_messages" id="chat_msg" style="order: 0"></div>
 				<div class="chat_input" style="order: 1;">
 				  <input type="text" id="msg-input" name="fname" style="order: 0; border-radius: 10px;" />
-				  <button class="buttons" id="send_button" role="button" style="order: 1">
-					Send
-				  </button>
+				  <div class="btn-group">
+					<button id="send_button" >
+						Send
+					  </button>
+				  </div>
 				</div>
 			</div>
 			<div id="door-pop" style="display: none;">
-				<button id="enter-room-button" class="pop-buttons" role="button">
-					Click to enter room
-				</button>
+				<div class="btn-group">
+					<button id="enter-room-button">
+						Click to enter room
+					</button>
+				</div>
+			</div>
+			<div id="interact-pop" style="display: none;">
+				<div class="btn-group">
+					<button id="click-user-button">
+						Direct Message
+					</button>
+					<button id="click-user-close-button">
+						X
+					</button>
+				</div>
 			</div>
 			<div id="item-pop" style="display: none;">
 				<button id="item-button" class="pop-buttons" role="button">
@@ -126,30 +153,30 @@
 				</iframe> -->
 				<button type="button" id="btn-cancel">Close</button>
 			</div>
-			<div id="view-panel">
-				<button id="first-person-view-button" class="view-button" role="button" style="order: 0;">
+			<div id="view-panel" class="btn-group">
+				<button id="first-person-view-button" >
 					First Person
 				</button>
-				<button id="3rd-person-view-button" class="view-button" role="button" style="order: 1;">
+				<button id="3rd-person-view-button" >
 					3rd Person
 				</button>
-				<button id="far-view-button" class="view-button" role="button" style="order: 2;">
+				<button id="far-view-button"  >
 					Far View
 				</button>
 			</div>
-			<div id="anim-panel">
-				<button id="dance-button" class="view-button" role="button" style="order: 0;">
+			<div id="anim-panel" class="btn-group">
+				<button id="dance-button">
 					Dance
 				</button>
-				<button id="wave-button" class="view-button" role="button" style="order: 1;">
+				<button id="wave-button">
 					Wave
 				</button>
-				<button id="idle-button" class="view-button" role="button" style="order: 2;">
+				<button id="idle-button">
 					Idle
 				</button>
 			</div>
-			<div id="avatar-panel">
-				<button id="avatar-button" class="view-button" role="button" style="order: 0;">
+			<div id="avatar-panel" class="btn-group">
+				<button id="avatar-button">
 					Change Avatar
 				</button>
 			</div>

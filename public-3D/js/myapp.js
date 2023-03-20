@@ -137,24 +137,22 @@ const MYAPP = {
       MYCLIENT.connect('localhost:9018', roomName, userName, password, this.myAvatar, is_sign_up);
 
       MYCLIENT.on_connect = function( server ) {
-        //alert("You are connected!"); // TODO: 
-        //$('#chat-connected-msg').html(`You are connected to room: ${roomName}`);
-        //$('#chat-connected-msg-status').html(`CONNECTED :)`);
-        //$('#add-chat-div').css('display', 'flex');
+        $('#bar-status').html(`Connected`);
       };
 
       MYCLIENT.on_auth = function( data ) {
         console.log("INSIDE AUTH");
         if (data.ret == true) {
-          alert("Correct password");
+          //alert("Correct password");
         } else {
           alert(data.msg);
           location.reload(); // Reload page
         }
       }
       MYCLIENT.on_ready = function(id, data) { //TODO: send user avatar, previous room
-        //$('#chat-connected-msg-userName').html(`Your userName is: ${userName}`);
-        //$('#chat-connected-msg-userID').html(`Your userID is: ${id}`);
+        $('#bar-username').html(userName);
+        $('#bar-roomname').html(data.previous_room);
+        
         MYAPP.myUserID = id;
         MYAPP.mapNamewithIRev.set(userName, id);
         // Callbacks
@@ -384,7 +382,7 @@ const MYAPP = {
       MYCLIENT.changeRoom(new_room.name);
       WORLD.changeRoom(WORLD.getUserById(MYAPP.myUserID), new_room);
       WORLD_3D.changeRoom(WORLD_3D.current_room, new_room);
-      //console.log("Enter room clicked");
+      $('#bar-roomname').html(new_room.name);
     },
 
     showEnterRoom: function(target_room_name)
@@ -476,6 +474,19 @@ const MYAPP = {
         document.getElementById('choose-avatar-page').style.display = 'none';
         document.getElementById('canvas-wrap').style.display = 'block';
         console.log("[App] New avatar selected: " + MYAPP.myAvatar);
+      });
+    },
+
+    interactUser: function(node)
+    {
+      var name_node = MYAPP.myUser + "_selector";
+      if (name_node === node.name) return;
+      document.getElementById('interact-pop').style.display = 'block';
+      $('#click-user-button').click(function() {
+        document.getElementById('interact-pop').style.display = 'none';
+      });
+      $('#click-user-close-button').click(function() {
+        document.getElementById('interact-pop').style.display = 'none';
       });
     },
 

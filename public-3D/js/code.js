@@ -360,14 +360,14 @@ var WORLD_3D = {
 				//compute collision with floor plane
 				var ray = WORLD_3D.camera.getRay(e.canvasx, e.canvasy);
 				var node = WORLD_3D.scene.testRay(ray, null, 10000, 0b1000); // layer 4 cause girl_selector is in layer 4
-				if (node != null) console.log("You clicked the girl_selector: node is: ", node);
+				if (node != null) MYAPP.interactUser(node);
 				//var coll = vec3.create();
 				//scene.testRay(ray, coll, 1000, 0xFF, true);
 				if( ray.testPlane( RD.ZERO, RD.UP ) ) //collision
 				{
 					//console.log( "floor position clicked", ray.collision_point );
 					//girl_pivot.position = ray.collision_point;
-					WORLD_3D.my_character_pivot.orientTo(ray.collision_point, true, [0,1,0], false, true);
+					//WORLD_3D.my_character_pivot.orientTo(ray.collision_point, true, [0,1,0], false, true);
 				}
 			}
 		}
