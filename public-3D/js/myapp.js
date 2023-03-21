@@ -490,7 +490,7 @@ const MYAPP = {
       });
     },
 
-  };
+  };  
 
 
 // https://codepen.io/junior-abd-almaged/pen/gQEbRv  --> on message received pass it trhough translate, detect autoamtica language?
