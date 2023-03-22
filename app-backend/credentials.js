@@ -109,10 +109,30 @@ var DATABASE_MANAGER = {
     get_user_room: async function(user_name)
     {
         if (user_name == null)
-            throw("Cannot save position of user because user_name is null");
+            throw("Cannot save room of user because user_name is null");
             
         return await REDIS_CLIENT.get_value_from_key("users:" + user_name + ":room_name");
     },
+
+    save_session_token: async function(user_name, token)
+    {
+        if (user_name == null)
+            throw("Cannot save token of user because user_name is null");
+        if (token == null)
+            throw("Cannot save token of user because token is null");
+
+        await REDIS_CLIENT.set_key_value("users:" + token + ":session_token", user_name);
+    },
+
+    get_session_token_info: async function(token)
+    {
+        if (token == null)
+            throw("Cannot save position of user because user_name is null");
+            
+        return await REDIS_CLIENT.get_value_from_key("users:" + token + ":session_token");
+    },
+
+    
 
 }
 

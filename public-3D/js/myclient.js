@@ -49,12 +49,48 @@ var MYCLIENT = {
         }
 
         var protocol = "ws://";
-        var final_url = protocol + url + "/" + room_name + "+" + user_name + "+" + password + "+" + spriteURL + "+" + is_sign_up;
+        var final_url = protocol + url + "/?room_name=" + room_name + "&user_name=" + user_name + "&password=" + password + "&avatar=" + spriteURL + "&is_sign_up=" + is_sign_up;
         this.socket = new WebSocket(final_url);
         this.socket.onopen = this.onOpen.bind(this); 
         this.socket.onclose = this.onClose.bind(this);
         this.socket.onmessage = this.onMessage.bind(this);
         this.socket.onerror = this.onError.bind(this);
+    },
+
+    connect_with_token: function( url )
+    {
+
+        if (!localStorage.token) return false;
+        if (!url) throw("You must specify the server URL of the server");
+
+        // If socket not null, close it and set everything to null    
+        if (this.socket)
+        {
+            this.socket.onmessage = null;
+            this.socket.onclose = null;
+            this.socket.onopen = null;
+            this.socket.close();
+        }
+
+        this.clients = {};
+
+        if(typeof(WebSocket) == "undefined")
+            WebSocket = window.MozWebSocket;
+        if(typeof(WebSocket) == "undefined")
+        {
+            alert("Websockets not supported by your browser, consider switching to the latest version of Firefox, Chrome or Safari.");
+            return;
+        }
+        console.log("Local storage token is: " + localStorage.token);
+
+        var protocol = "ws://";
+        var final_url = protocol + url + "/?my_token=" + localStorage.token;
+        this.socket = new WebSocket(final_url);
+        this.socket.onopen = this.onOpen.bind(this); 
+        this.socket.onclose = this.onClose.bind(this);
+        this.socket.onmessage = this.onMessage.bind(this);
+        this.socket.onerror = this.onError.bind(this);
+        return true;
     },
 
     onOpen: function() 
@@ -152,6 +188,8 @@ var MYCLIENT = {
         else if (type == "USER_ID") // Get user id and user previous position if applicable
         {
             this.user_id = author_id;
+            this.user_name = data.user_name;
+            this.room_name = data.previous_room;
             this.clients[ author_id ] = { id: author_id, name: this.user_name };
             if(this.on_ready)
                 this.on_ready( author_id, data );

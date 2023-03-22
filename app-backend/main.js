@@ -32,8 +32,9 @@ wss.on('request', function(request) {
     var ws = connection;
     console.log("NEW WEBSOCKET USER!!!");
 
-    var full_url = request.resourceURL.pathname;
-    MYSERVER.onUserConnect(connection, full_url);
+   
+    console.log("resource url queri: " + JSON.stringify(request.resourceURL.query));
+    MYSERVER.onUserConnect(connection, request.resourceURL);
 
     connection.on('message', function( msg ) {
         // if(!isJson(msg)) {

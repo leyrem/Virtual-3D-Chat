@@ -6,7 +6,7 @@
         {
             "id": 0,
             "name": "japanese_street",
-            "file3D": "data/japanese_street_at_night/scene.gltf",
+            "file3D": "data/japanese_street_at_night.glb",
             "scaling": 40,
             "people": [],
             "walkarea": 
@@ -132,7 +132,7 @@
         {
             "id": 3,
             "name": "abandoned_bar",
-            "file3D": "data/abandoned_bar__tavern.glb",
+            "file3D": "data/abandoned_bar/scene.gltf",
             "scaling": 30,
             "people": [],
             "walkarea": 

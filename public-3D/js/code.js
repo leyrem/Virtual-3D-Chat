@@ -204,6 +204,8 @@ var WORLD_3D = {
 		room.loadGLTF(WORLD_3D.current_room.file3D);
 		this.scene.root.addChild( room );
 
+		if (WORLD_3D.current_room.name == "living_room") WORLD_3D.createSubCanvasVideo();
+
 		// ----------------- main loop ------------------------
 
 		//main draw function

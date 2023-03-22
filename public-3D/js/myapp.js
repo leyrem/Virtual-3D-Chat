@@ -1,3 +1,7 @@
+// Set the global configs to synchronous 
+$.ajaxSetup({
+  async: false
+});
 
 // Namespace that includes the whole functionality of the chat
 const MYAPP = {
@@ -66,6 +70,33 @@ const MYAPP = {
 
       // avatar button
       $('#avatar-button').click(MYAPP.changeAvatar);
+
+      $('#logout_button').click(MYAPP.logoutUser);
+
+      // Direct msg close
+      $('#close_direct_send_button').click(function() {
+        document.getElementById('direct-msg-panel').style.display = 'none';
+        document.getElementById('direct_chat_msg').innerHTML = '';
+      });
+      $('#direct_send_button').click(MYAPP.sendDirectMessage);
+      $('#direct-msg-input').on('keypress', function(e) {
+        if (e.which == 13) MYAPP.sendDirectMessage();
+      });
+
+      $('#click-user-button').click(function() {
+        document.getElementById('interact-pop').style.display = 'none';
+        document.getElementById('direct-msg-panel').style.display = 'block';
+      });
+      $('#click-user-close-button').click(function() {
+        document.getElementById('interact-pop').style.display = 'none';
+      });
+
+      $('select').on('change', function() {
+        MYAPP.my_language = this.value;
+      });
+
+      if (localStorage.token) MYAPP.startAPPwithToken();
+
     },
 
     logInChat: function()
@@ -112,6 +143,24 @@ const MYAPP = {
       });
     },
 
+    startAPPwithToken: function() 
+    {
+      console.log("Logging in with stored token");
+      fetch("./js/world.json").then(function(resp) {
+              return resp.json();
+          }).then(function(json) {
+              WORLD.fromJSON(json);
+              var room_name = WORLD.default_room;
+              WORLD_3D.current_room = WORLD.rooms[WORLD.default_room];
+              //console.log("World JSON is: " +JSON.stringify(json));
+
+              // Connect to the server
+              MYAPP.connectServer(null, null, null, null, true);
+          }).catch( function(error) {
+            console.log("Error fetching:" + error);
+          });
+    },
+
     startAPP: function(password, is_sign_up) 
     {
       fetch("./js/world.json").then(function(resp) {
@@ -123,25 +172,31 @@ const MYAPP = {
               //console.log("World JSON is: " +JSON.stringify(json));
 
               // Connect to the server
-              MYAPP.connectServer(MYAPP.myUser, room_name, password, is_sign_up);
+              MYAPP.connectServer(MYAPP.myUser, room_name, password, is_sign_up, false);
           }).catch( function(error) {
             console.log("Error fetching:" + error);
           });
     },
 
-    connectServer: function(userName, roomName, password, is_sign_up)
+    connectServer: function(userName, roomName, password, is_sign_up, with_token)
     {
     
+      var success = null;
+      if (with_token == true) success = MYCLIENT.connect_with_token('localhost:9018');
+      if (with_token == true && success != true) return;
+      if (with_token == true && success == true) {
+        document.getElementById('login-page').style.display = 'none';
+        document.getElementById('canvas-wrap').style.display = 'block';
+      }
+      if (with_token == false) MYCLIENT.connect('localhost:9018', roomName, userName, password, this.myAvatar, is_sign_up);
       // server.connect( 'localhost:1337', roomName, userName);
       //MYCLIENT.connect('ecv-etic.upf.edu/node/9018/ws', roomName, userName, password, this.myUserSprite);
-      MYCLIENT.connect('localhost:9018', roomName, userName, password, this.myAvatar, is_sign_up);
 
       MYCLIENT.on_connect = function( server ) {
         $('#bar-status').html(`Connected`);
       };
 
       MYCLIENT.on_auth = function( data ) {
-        console.log("INSIDE AUTH");
         if (data.ret == true) {
           //alert("Correct password");
         } else {
@@ -150,11 +205,12 @@ const MYAPP = {
         }
       }
       MYCLIENT.on_ready = function(id, data) { //TODO: send user avatar, previous room
-        $('#bar-username').html(userName);
+        $('#bar-username').html(data.user_name);
         $('#bar-roomname').html(data.previous_room);
         
         MYAPP.myUserID = id;
-        MYAPP.mapNamewithIRev.set(userName, id);
+        MYAPP.myUser = data.user_name;
+        MYAPP.mapNamewithIRev.set(data.user_name, id);
         // Callbacks
         MYCLIENT.on_room_info = MYAPP.onRoomInfo;
         MYCLIENT.on_user_connected = MYAPP.onUserConnect;
@@ -163,14 +219,20 @@ const MYAPP = {
         MYCLIENT.on_close = MYAPP.onClose;
 
         // my user object
-        MYAPP.my_user_obj = new User(userName);
+        MYAPP.my_user_obj = new User(data.user_name);
         MYAPP.my_user_obj.id = parseInt(id);
         MYAPP.my_user_obj.room = data.previous_room;
         MYAPP.my_user_obj.position = data.pos;
         MYAPP.my_user_obj.avatar = data.avatar; 
         MYAPP.myAvatar = data.avatar;
+
+        if (!localStorage.token) {
+          localStorage.setItem("token", data.session_token);
+          console.log("Session token set with value: " + data.session_token);
+        }
+
         WORLD_3D.current_room = WORLD.rooms[data.previous_room];
-        WORLD.addUser(MYAPP.my_user_obj, WORLD_3D.current_room); // TODO: set WORLD_3D current room a room enviada servidor
+        WORLD.addUser(MYAPP.my_user_obj, WORLD_3D.current_room);
         WORLD_3D.onWorldLoaded();
       };
     },
@@ -194,7 +256,7 @@ const MYAPP = {
             WORLD.addUser(new_user, WORLD_3D.current_room); // TODO: set WORLD_3D current room a room enviada servidor
             WORLD_3D.addUserNode(false, new_user);
 
-            MYAPP.mapNamewithIRev.set(room_info.clients[i].user_name, room_info.clients[i].user_id); // TODO: DELETE 
+            MYAPP.mapNamewithIRev.set(room_info.clients[i].user_name, room_info.clients[i].user_id);
           
           // var new_user = new User(room_info.clients[i].user_name);
           // new_user.id = room_info.clients[i].user_id;
@@ -237,12 +299,14 @@ const MYAPP = {
 
     onClose: function()
     {
-      alert("Server closed!");
+      //alert("Connection closed");
       location.reload(); // Reload page
     },
   
     displayMessage: function  ( msg, side )
     {
+      if (MYAPP.my_language != "no_translate") msg.content = MYAPP.translate(msg.content, msg.language);
+
       if ( msg.type.toLowerCase() == 'text' ) {
         if ( msg.content != '' ) {
           // Create HTML to display msg
@@ -286,7 +350,38 @@ const MYAPP = {
           chat.appendChild(msgDiv);
           chat.scrollTop = 100000;
         }
-      } 
+      } else if (msg.type.toLowerCase() == 'private') {
+        
+        if (MYAPP.mapNamewithIRev.get(msg.userName) != MYAPP.current_selected_user_id && msg.userName != MYAPP.myUser) document.getElementById('direct_chat_msg').innerHTML = '';
+        if (msg.userName != MYAPP.myUser) {
+          document.getElementById('direct-msg-target-username').innerHTML = msg.userName;
+          MYAPP.current_selected_user_id = MYAPP.mapNamewithIRev.get(msg.userName)
+        }
+        document.getElementById('direct-msg-panel').style.display = 'block';
+        if ( msg.content != '' ) {
+          // Create HTML to display msg
+          var contentDiv = document.createElement('div');
+          var msgDiv = document.createElement('div');
+          msgDiv.className = 'msg';
+          contentDiv.className = `content ${side}`;
+          var textP = document.createElement('p');
+          textP.innerHTML = msg.content;
+          var userP = document.createElement('p');
+          userP.className = `user-name ${side}`;
+          if (side === "left") userP.innerHTML = msg.userName;
+          else userP.innerHTML = this.myUser;
+          var timeP = document.createElement('p');
+          timeP.className = `time ${side}`;
+          timeP.innerHTML = msg.time;
+          contentDiv.appendChild(textP);
+          msgDiv.appendChild(userP);
+          msgDiv.appendChild(contentDiv);
+          msgDiv.appendChild(timeP);
+          var chat = document.getElementById('direct_chat_msg');
+          chat.appendChild(msgDiv);
+          chat.scrollTop = 100000;
+        }
+      }
     },
   
     sendSysMsg: function(msgText, userName, time)
@@ -325,6 +420,7 @@ const MYAPP = {
         type: type,
         content: content,
         userName: userName,
+        language: MYAPP.my_language,
         time: time,
       };
       return msgObject;
@@ -383,6 +479,7 @@ const MYAPP = {
       WORLD.changeRoom(WORLD.getUserById(MYAPP.myUserID), new_room);
       WORLD_3D.changeRoom(WORLD_3D.current_room, new_room);
       $('#bar-roomname').html(new_room.name);
+      document.getElementById("chat_msg").innerHTML = "";
     },
 
     showEnterRoom: function(target_room_name)
@@ -482,18 +579,57 @@ const MYAPP = {
       var name_node = MYAPP.myUser + "_selector";
       if (name_node === node.name) return;
       document.getElementById('interact-pop').style.display = 'block';
-      $('#click-user-button').click(function() {
-        document.getElementById('interact-pop').style.display = 'none';
-      });
-      $('#click-user-close-button').click(function() {
-        document.getElementById('interact-pop').style.display = 'none';
-      });
+      document.getElementById('direct-msg-target-username').innerHTML = node.name.slice(0, -9);
+      if (MYAPP.mapNamewithIRev.get(node.name.slice(0, -9))== null) throw ("cannot send get id of selected user node");
+      MYAPP.current_selected_user_id = MYAPP.mapNamewithIRev.get(node.name.slice(0, -9));
+    },
+
+    sendDirectMessage: function()
+    {
+      const input = $('#direct-msg-input').val();
+      if (input == '') return;      
+
+      var msgObj = MYAPP.createMsgObject('private', input, MYAPP.myUser, MYAPP.currentTime());
+      MYAPP.displayMessage(msgObj, "right");
+
+      MYCLIENT.sendPrivateMessage(JSON.stringify(msgObj), [MYAPP.current_selected_user_id]);
+      $('#direct-msg-input').val(''); // Reset the input value to empty text
+    },
+
+    logoutUser: function()
+    {
+      localStorage.removeItem("token");
+      MYCLIENT.socket.close();
+    },
+
+    translate: function( msg_text, source_lang )
+    {
+
+      if (source_lang == "no_translate") return msg_text;
+  
+      var sourceText = msg_text;
+      var sourceLang = source_lang;
+      var targetLang = MYAPP.my_language;
+      
+      var url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl="+ sourceLang + "&tl=" + targetLang + "&dt=t&q=" + encodeURI(sourceText);
+      
+      let result;
+
+      try {
+        $.getJSON(url, function(data) {
+          result = data[0][0][0];
+        });
+        return result;
+      } catch (error) {
+        console.error(error);
+        throw new error;
+      }
     },
 
   };  
 
 
 // https://codepen.io/junior-abd-almaged/pen/gQEbRv  --> on message received pass it trhough translate, detect autoamtica language?
-// https://libretranslate.com/?source=auto&target=es&q=hello%250A
+
   
   

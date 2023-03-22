@@ -1,4 +1,5 @@
 var Room = require('../public-3D/js/world.js');
+const crypto = require('crypto');
 var DATABASE_MANAGER = require('./credentials.js').DATABASE_MANAGER;
 var WORLD = Room.WORLD;
 const fs = require('fs');
@@ -58,54 +59,70 @@ var MYSERVER = {
 			
         };
 
-        // Get room name and user name
-		// Get info from url
-		// I am assuming the info is sent as room_name+user_name by the client
-		var sent_info = req_url.split("+");
-		var room_name = sent_info[0];
-		var user_name = sent_info[1];
-		const password = sent_info[2];
-		var sprite = sent_info[3];
-		const is_sign_up = sent_info[4];
+		var room_name = "";
+		var user_name = "";
+		var password = "";
+		var sprite = "";
+		var is_sign_up = "";
+		var ret_u = null;
 
-		
-		// DEAL WITH PASSORD
-		if (is_sign_up == "false") {
-			var res = await DATABASE_MANAGER.check_user_in_db(user_name);
-			if (res == false) {
-				console.log("[Server] uknown user, has to sign up first");
-				conn.sendToClient("AUTH", {ret: false, msg: "Username is not registered, you need to signup first"}); // Means the user has to signup first
-				return;
-			}
+		var token = req_url.query["my_token"];
+		if (token != null) ret_u = await DATABASE_MANAGER.get_session_token_info(token);
+		if (ret_u != null) {
+			user_name = ret_u;
+		} else {
+			room_name = req_url.query.room_name;
+			user_name = req_url.query.user_name;
+			password = req_url.query.password;
+			sprite = req_url.query.avatar;
+			is_sign_up = req_url.query.is_sign_up;
 		}
 
-		if (is_sign_up == "true") {
-			var res = await DATABASE_MANAGER.check_user_in_db(user_name);
-			if (res == true) {
-				console.log("[Server] User is trying to sign up with already existing username");
-				conn.sendToClient("AUTH", {ret: false, msg: "User with that username already exists"}); // Means the user has to signup with another user name
+		 if (password != "") {
+			// DEAL WITH PASSORD
+			if (is_sign_up == "false") {
+				var res = await DATABASE_MANAGER.check_user_in_db(user_name);
+				if (res == false) {
+					console.log("[Server] uknown user, has to sign up first");
+					conn.sendToClient("AUTH", {ret: false, msg: "Username is not registered, you need to signup first"}); // Means the user has to signup first
+					return;
+				}
+			}
+
+			if (is_sign_up == "true") {
+				var res = await DATABASE_MANAGER.check_user_in_db(user_name);
+				if (res == true) {
+					console.log("[Server] User is trying to sign up with already existing username");
+					conn.sendToClient("AUTH", {ret: false, msg: "User with that username already exists"}); // Means the user has to signup with another user name
+					return;
+				}
+				// Save the avatar of the user if the user is signing up for the first time
+				await DATABASE_MANAGER.save_user_avatar(user_name, sprite);
+			}
+			
+			var ret = await DATABASE_MANAGER.login(user_name, password);
+			if (ret == false) {
+				conn.sendToClient("AUTH", {ret: false, msg: "Incorrect password"});
 				return;
 			}
-			// Save the avatar of the user if the user is signing up for the first time
-			await DATABASE_MANAGER.save_user_avatar(user_name, sprite);
-		}
+			conn.sendToClient("AUTH", {ret: true, msg: ""});
+
+			token = crypto.randomBytes(16).toString('base64');
+			console.log("[GENERATE AND STORE TOKEN] Token is: " + token);
+			await DATABASE_MANAGER.save_session_token(user_name, token);
+		 }
 		
-		var ret = await DATABASE_MANAGER.login(user_name, password);
-		if (ret == false) {
-			conn.sendToClient("AUTH", {ret: false, msg: "Incorrect password"});
-		  	return;
-		}
-		conn.sendToClient("AUTH", {ret: true, msg: ""});
+
 		// Get the user avatar and send it to user when the user logs in again
 		var u_avatar = await DATABASE_MANAGER.get_user_avatar(user_name);
 		if (u_avatar != null) sprite = u_avatar;
 
-        // Assing room_name to client connection
-		conn.room_name = room_name.substr(1, room_name.length); //strip the dash
 
 		// Get the last room the user was in when he/she logged out previously
 		var room_name_stored = await DATABASE_MANAGER.get_user_room(user_name);
-		if (room_name_stored != null) conn.room_name = room_name_stored;
+		if (room_name_stored != null) {
+			conn.room_name = room_name_stored;
+		} else conn.room_name = room_name;
 
         // Assing ID to client connection
         conn.user_id = this.last_id;
@@ -140,12 +157,12 @@ var MYSERVER = {
 
 		var pos_recv = await DATABASE_MANAGER.get_user_position(conn.user_name);
 		if (pos_recv != null) {
-			// Send ID to client and position and avatar and room
-			var previous_data = { pos: JSON.parse(pos_recv), avatar: sprite, previous_room: conn.room_name};
+			// Send ID to client, position, avatar, room and token
+			var previous_data = { user_name: user_name, pos: JSON.parse(pos_recv), avatar: sprite, previous_room: conn.room_name, session_token: token };
 			conn.user.position = JSON.parse(pos_recv);
 			conn.sendToClient("USER_ID", previous_data);
 		}  else {
-			var def_data = { pos: [-10, 0, 100], avatar: sprite, previous_room: conn.room_name };
+			var def_data = { user_name: user_name, pos: [-10, 0, 100], avatar: sprite, previous_room: conn.room_name, session_token: token };
 			conn.user.position = [-10,0,100];
 			conn.sendToClient("USER_ID", def_data); // default position
 		}
