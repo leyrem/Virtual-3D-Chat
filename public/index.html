@@ -1,105 +1,227 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
-        <title>My 2D chat</title>
-        <link type="text/css" rel="stylesheet" media="all" href="style.css" />
-        <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet" />
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-        <script src="myclient.js"></script>
-        <script src="script.js"></script>
-    </head>
-    <body>
-        <div style="background-image: url('images/arcade.jpg');" id="login-page">
-            <!-- Login area where username and roomname are inputted -->
-            
-            <div class="on-join-div">
-              <div>
-                <h1>
-                  Choose your Avatar:
-                </h1>
-                <button style="background-color:white;" id="character-button1">
-                  <img
-                  src="images/u1.png"
-                  style="width: 64px; height: 128px"
-                  alt=""
-                  />
-                </button>
-                <button style="background-color:transparent;" id="character-button2">
-                  <img
-                  src="images/u2.png"
-                  style="width: 64px; height: 128px"
-                  alt=""
-                  />
-                </button>
-                <button style="background-color:transparent;" id="character-button3">
-                  <img
-                  src="images/u3.png"
-                  style="width: 64px; height: 128px"
-                  alt=""
-                  />
-                </button>
-                <button style="background-color:transparent;" id="character-button4">
-                  <img
-                  src="images/u4.png"
-                  style="width: 64px; height: 128px"
-                  alt=""
-                  />
-                </button>
-              </div>
-              <p id ="welcome-msg">Welcome to Virtual Chat 2D!</p>
-              <div class="chat_input join" style="order: 1">
-                <p style="order: 0; margin: 1%;">User Name</p>
-                <input type="text" id="on-join-input-userName" name="fname" style="order: 1"/>
-                <p style="order: 2; margin: 1%">User Password</p>
-                <input type="password" id="on-join-input-password" name="fname" style="order: 3"/>
-                <button class="buttons" id="send-button-join" role="button" style="order: 4">
-                  Enter
-                </button>
-              </div>
-            </div>
-        </div>
-        <div id="app-page">
-          <div id="canvas-container">
-            <canvas style="order:0;"></canvas>
-          </div>
-            <div class="chat-container" style="order:1;">
-                <!-- Chat are to send and receive messages -->
-                <div class="chat_area">
-                    <div class="chat_header" style="order: 0">
-                        <div class="profile_img" style="order: 0">
-                            <img
-                            src="images/pic01.jpg"
-                            style="width: 80px; height: 80px"
-                            alt=""
-                            />
-                        </div>
-                        <!-- <div class="profile_name" style="order: 1;">
-                            <p style="font-size: 25px" id="person_name"></p>
-                        </div> -->
-                        <div class="profile_info" style="display:flex; flex-direction:column;">
-                            <p id="chat-connected-msg" class="chat-info" style="order:0;"></p>
-                            <p id="chat-connected-msg-userID" class="chat-info" style="order:1;"></p>
-                            <p id="chat-connected-msg-userName" class="chat-info" style="order:2;"></p>
-                            <p id="chat-connected-msg-status" class="chat-info" style="order:3;"></p>
-                        </div>
-                    </div>
-                    <div class="chatroom" style="order: 1">
-                      <div class="chat_messages" id="chat_msg" style="order: 0">
-                      </div>
-                      <div class="chat_input" style="order: 1; margin-bottom: 5%">
-                        <input type="text" id="msg-input" name="fname" style="order: 0" />
-                        <button class="buttons" id="send_button" role="button" style="order: 1">
-                          Send
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-            </div>
-          </div>
-        <script src="room.js"></script>
-        <script src="myapp.js"></script>
-        <script src="code.js"></script>
-        <script> MYCHAT.init(); </script>
-    </body>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+
+<title>ECV</title>
+	<style type='text/css'>
+		html, body { width: 100%; height: 100%; margin: 0; padding: 0 }
+	</style>
+	<link type="text/css" rel="stylesheet" media="all" href="style.css"/>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.6.3.js"></script>
+	<script type="text/javascript" src="js/extra/gl-matrix-min.js"></script>
+	<script type="text/javascript" src="js/extra/litegl.js"></script>
+	<script type="text/javascript" src="js/extra/rendeer.js"></script>
+	<script type="text/javascript" src="js/extra/rendeer-animation.js"></script>
+	<script type="text/javascript" src="js/extra/rendeer-curves.js"></script>
+	<script type="text/javascript" src="js/extra/rendeer-extended.js"></script>
+	<script type="text/javascript" src="js/extra/rendeer-gizmo.js"></script>
+	<script type="text/javascript" src="js/extra/rendeer-gltf.js"></script>
+	<script type="text/javascript" src="js/extra/rendeer-light.js"></script>
+	<script type="text/javascript" src="js/extra/rendeer-pbr.js"></script>
+	<script type="text/javascript" src="js/extra/wbin.js"></script>
+	<script type="text/javascript" src="js/extra/walkarea.js"></script>
+	<script type="text/javascript" src="js/code.js"></script>
+	<script type="text/javascript" src="js/myapp.js"></script>
+	<script type="text/javascript" src="js/world.js"></script>
+	<script type="text/javascript" src="js/myclient.js"></script>
+</head>
+<body>
+	<div style="background-image: url('images/back-mini.jpg'); display: block;" class="enter-pages" id="login-page">
+		<!-- Login area where username and roomname are inputted -->	
+		<div class="on-join-div" style="margin-top:15%">
+		  <div class="chat-input-join" style="order: 1;">
+			<p id ="welcome-msg" style="order:0;"><img src="images/banner2.png" style="width:600px; height: 150px;"/></p>
+			<div  class ="login-inputs" style="order:1;">
+				<p style="order: 0; margin: 1%;">User Name</p>
+				<input type="text" id="on-join-input-userName" name="fname" style="order: 1"/>
+				<p style="order: 2; margin: 1%">User Password</p>
+				<input type="password" id="on-join-input-password" name="fname" style="order: 3"/>
+				<button class="buttons" id="send-button-join" role="button" style="order: 4">
+				Enter
+				</button>
+				<button class="buttons" id="signup-button-join" role="button" style="order: 5">
+					Or Sign Up here!
+				</button> 
+			</div>
+		  </div>
+		</div>
+	</div>
+	<div style="display: none;" id="choose-avatar-page">
+		<h1 style="color:white"><img src="images/banner-avatar.png" style="width: 500px;"/></h1>
+		<div id="choose-avatar">
+			<button style="background-color: transparent; border: 1px solid white; border-radius: 10px;" id="character-button1" class="character-buttons">
+			  <img
+			  src="images/girl-pink.png"
+			  style="order: 0; width: 130px; height: 300px"
+			  />
+			</button>
+			<button style="background-color:transparent;" id="character-button2" class="character-buttons">
+			  <img
+			  src="images/bryce.png"
+			  style="order: 1; width: 130px; height: 300px"
+			  />
+			</button>
+			<button style="background-color:transparent;" id="character-button3" class="character-buttons">
+			  <img
+			  src="images/michelle.png"
+			  style="order: 2; width: 130px; height: 300px"
+			  />
+			</button>
+			<button style="background-color:transparent;" id="character-button4" class="character-buttons">
+			  <img
+			  src="images/james.png"
+			  style="order: 3; width: 130px; height: 300px"
+			  />
+			</button>
+			<div class="btn-group" style="height: 50px; margin-top: 18%;">
+				<button id="avatar-select-button">
+					Let's Go!
+				</button>
+			</div>
+		  </div>
+	</div>
+	<div style="background-image: url('images/back-mini.jpg'); display: none;"  class="enter-pages" id="signup-page">
+		<div class="on-join-div">
+			<div class="chat-input-join" style="order: 1">
+				<p id ="signup-msg" style="order:0;">Sign Up!</p>
+				<div  class ="login-inputs" style="order:1;">
+					<p style="order: 0; margin: 1%;">User Name</p>
+					<input type="text" id="on-signup-input-userName" name="fname" style="order: 1"/>
+					<p style="order: 2; margin: 1%">User Password</p>
+					<input type="password" id="on-signup-input-password" name="fname" style="order: 3"/>
+					<button class="buttons" id="send-button-signup" role="button" style="order: 4">
+					Sign Up 
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="canvas-wrap" style="display: none;">
+		<div id="overlay" >
+			<div class="card">
+				
+			  </div>
+			  <div class="card2">
+				<div style="order:0; display: flex; flex-direction: column;">
+					<h3 style="order:0; margin:1%;">STATUS</h3>
+					<div class="card3 cont" style="order:1;"><p id="bar-status"></p></div>
+				</div>
+				<div style="order:1; display: flex; flex-direction: column;">
+					<h3 style="order:0; margin:1%;">USERNAME</h3>
+					<div class="card3"  style="order: 1;"><p id="bar-username"></p> </div>
+				</div>
+				<div style="order:2; display: flex; flex-direction: column;">
+					<h3 style="order:0; margin:1%;">ROOMNAME</h3>
+					<div class="card3" style="order:1;"><p id="bar-roomname"></p> </div>
+				</div>
+				<div style="order:3;">
+					<div class="btn-group">
+						<button id="logout_button" >
+							LOGOUT
+						  </button>
+					  </div>
+				</div>
+			  </div>
+			<div class="chatroom" style="order: 1">
+				<select name="langs" id="lang-select" style="order:0;">
+					<option value="en">English</option>
+					<option value="es">Spanish</option>
+					<option value="fr">French</option>
+					<option value="ca">Catalan</option>
+					<option value="no_translate">No translate</option>
+				</select>
+				<div class="chat_messages" id="chat_msg" style="order: 1"></div>
+				<div class="chat_input" style="order: 2;">
+				  <input type="text" id="msg-input" name="fname" style="order: 0; border-radius: 10px;" />
+				  <div class="btn-group">
+					<button id="send_button" >
+						Send
+					  </button>
+				  </div>
+				</div>
+			</div>
+			<div class="card4" id="direct-msg-panel" style="display:none;">
+				<h2 style="order:0; margin-left:2%">Direct Message With: <strong id="direct-msg-target-username"></strong></h2>
+				<div class="direct_chat_messages" id="direct_chat_msg" style="order: 1"></div>
+				<div class="chat_input" style="order: 2;">
+				  <input type="text" id="direct-msg-input" name="fname" style="order: 0; border-radius: 10px;" />
+				  <div class="btn-group">
+					<button id="direct_send_button" >
+						Send
+					</button>
+					<button id="close_direct_send_button" >
+						X
+					</button>
+				  </div>
+				</div>
+			</div>
+			<div id="door-pop" style="display: none;">
+				<div class="btn-group">
+					<button id="enter-room-button">
+						Click to enter room
+					</button>
+				</div>
+			</div>
+			<div id="interact-pop" style="display: none;">
+				<div class="btn-group">
+					<button id="click-user-button">
+						Direct Message
+					</button>
+					<button id="click-user-close-button">
+						X
+					</button>
+				</div>
+			</div>
+			<div id="item-pop" style="display: none;">
+				<button id="item-button" class="pop-buttons" role="button">
+					Click to interact with item
+				</button>
+			</div>
+			<div class="music-popup" id="music-panel" style="display: none;">
+				<!-- <iframe 
+					style="border-radius:12px" 
+					src="https://open.spotify.com/embed/playlist/6UuXC6EPFgI73C3KsF92xB?utm_source=generator" 
+					width="100%" height="352" frameBorder="0" allowfullscreen="" 
+					allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+					loading="lazy">
+				</iframe> -->
+				<button type="button" id="btn-cancel">Close</button>
+			</div>
+			<div id="view-panel" class="btn-group">
+				<button id="first-person-view-button" >
+					First Person
+				</button>
+				<button id="3rd-person-view-button" >
+					3rd Person
+				</button>
+				<button id="far-view-button"  >
+					Far View
+				</button>
+			</div>
+			<div id="anim-panel" class="btn-group">
+				<button id="dance-button">
+					Dance
+				</button>
+				<button id="wave-button">
+					Wave
+				</button>
+				<button id="idle-button">
+					Idle
+				</button>
+			</div>
+			<div id="avatar-panel" class="btn-group">
+				<button id="avatar-button">
+					Change Avatar
+				</button>
+			</div>
+		</div>
+		
+	</div>
+	<video id="video" src="vid.mp4" controls style="display: none;"></video>
+</body>
+<script>
+	MYAPP.init();
+</script>
 </html>

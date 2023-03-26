@@ -1,4 +1,4 @@
-var Room = require('../public-3D/js/world.js');
+var Room = require('../public/js/world.js');
 const crypto = require('crypto');
 var DATABASE_MANAGER = require('./credentials.js').DATABASE_MANAGER;
 var WORLD = Room.WORLD;
