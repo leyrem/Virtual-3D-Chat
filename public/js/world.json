@@ -24,7 +24,7 @@
             ],
             "door_positions": [
                 {
-                    "target": "garage",
+                    "target": "jap",
                     "position": [35, 0, -84]
                 },
                 {
@@ -244,6 +244,41 @@
                 }
             ],
             "items": []
+        },
+        "jap": 
+        {
+            "id": 7,
+            "name": "jap",
+            "file3D": "data/japanese_traditional_room.glb",
+            "scaling": 40,
+            "people": [],
+            "walkarea": 
+            [
+                    {
+                        "init_pos": [-165, 0, -134],
+                        "height": 330,
+                        "width": 210
+                    }
+            ],
+            "door_positions": [
+                {
+                    "target": "japanese_street",
+                    "position": [-1, 0, -134]
+                },
+                {
+                    "target": "japanese_street",
+                    "position": [-9, 0, -134]
+                },
+                {
+                    "target": "japanese_street",
+                    "position": [20, 0, -134]
+                },{
+                    "target": "japanese_street",
+                    "position": [-20, 0, -134]
+                }
+            ],
+            "items": [
+            ]
         }
     }
 }

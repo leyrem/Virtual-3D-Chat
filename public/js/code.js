@@ -47,10 +47,6 @@ var WORLD_3D = {
 		//create a scene
 		this.scene = new RD.Scene();
 
-		// CANVAS---------------------------
-		//this.createSubCanvasVideo();
-		// -------------------------------
-
 		//create camera
 		WORLD_3D.camera = new RD.Camera();
 		WORLD_3D.camera.perspective( 60, gl.canvas.width / gl.canvas.height, 0.1, 1000 );
@@ -110,10 +106,6 @@ var WORLD_3D = {
 
 		// //create a scene
 		// this.scene = new RD.Scene();
-
-		// // CANVAS---------------------------
-		// //this.createSubCanvasVideo();
-		// // -------------------------------
 
 		// //create camera
 		// camera = new RD.Camera();
@@ -205,6 +197,10 @@ var WORLD_3D = {
 		this.scene.root.addChild( room );
 
 		if (WORLD_3D.current_room.name == "living_room") WORLD_3D.createSubCanvasVideo();
+		if (WORLD_3D.current_room.name == "conference") {
+			WORLD_3D.createSubCanvasVideoWebCam('video_webcam', "subcanvas_webcam", [-40,45,-175]);
+			WORLD_3D.createSubCanvasVideoWebCam('video_webcam_other', "subcanvas_webcam_other", [40,45,-175]);
+		}
 
 		// ----------------- main loop ------------------------
 
@@ -478,9 +474,16 @@ var WORLD_3D = {
 			WORLD_3D.removeUserNode(WORLD.getUserById(user_id));
 		}
 
-		if(current_room.name == "living_room") {
+		if (current_room.name == "living_room") {
 			var n = WORLD_3D.scene.root.findNodeByName("subcanvas");
 			WORLD_3D.scene.root.removeChild(n);
+		}
+		if (current_room.name == "conference") {
+			var n = WORLD_3D.scene.root.findNodeByName("subcanvas_webcam");
+			WORLD_3D.scene.root.removeChild(n);
+
+			//var n2 = WORLD_3D.scene.root.findNodeByName("subcanvas_webcam_other");
+			//WORLD_3D.scene.root.removeChild(n2);
 		}
 
 		var current_room_node = WORLD_3D.scene.root.findNodeByName(current_room.name);
@@ -506,6 +509,11 @@ var WORLD_3D = {
 		{
 			WORLD_3D.createSubCanvasVideo();
 		}
+		if (new_room.name == "conference")
+		{
+			WORLD_3D.createSubCanvasVideoWebCam('video_webcam', "subcanvas_webcam",[-40,45,-175]);
+			WORLD_3D.createSubCanvasVideoWebCam('video_webcam_other', "subcanvas_webcam_other",[40,45,-175]);
+		}
 	},
 
 	isByDoor: function( pos )
@@ -518,7 +526,7 @@ var WORLD_3D = {
 			// 	console.log("You are by door");
 			// 	return true;
 			// }
-			if ((door_positions[i].position[0] - 6) <= Math.round(pos[0]) &&  Math.round(pos[0]) <= (door_positions[i].position[0] + 6) && (door_positions[i].position[2] - 6) <= Math.round(pos[2]) &&  Math.round(pos[2]) <= (door_positions[i].position[2] + 6) ) 
+			if ((door_positions[i].position[0] - 20) <= Math.round(pos[0]) &&  Math.round(pos[0]) <= (door_positions[i].position[0] + 20) && (door_positions[i].position[2] - 20) <= Math.round(pos[2]) &&  Math.round(pos[2]) <= (door_positions[i].position[2] + 20) ) 
 			{
 				//console.log("You are by door");
 				return [true, door_positions[i].target];
@@ -550,6 +558,45 @@ var WORLD_3D = {
 			var coords = WORLD_3D.current_room.walkarea[i];
 			this.current_room_walkarea.addRect(coords.init_pos, coords.height, coords.width);
 		}
+	},
+	createSubCanvasVideoWebCam: function(videoID, name, postion_canvas)
+	{
+		//create an offscreen canvas where we will draw
+        var subcanvas = document.createElement("canvas");
+        subcanvas.width = 1800;
+        subcanvas.height = 1200;
+        var subctx = subcanvas.getContext("2d");
+        subctx.fillStyle = "white";
+        subctx.fillRect(0,0,subcanvas.width,subcanvas.height);
+        subctx.clearRect(2,2,subcanvas.width-4,subcanvas.height-4);
+
+		//create a texture to upload the offscreen canvas 
+        var texture = GL.Texture.fromImage(subcanvas, { wrap: gl.CLAMP_TO_EDGE });
+        gl.textures[name] = texture; //give it a name
+
+		//create a node
+		var panel = new RD.SceneNode({
+			name: name,
+			mesh:"plane",
+			scale:[80,42,4],
+			position: postion_canvas,//[-40,45,-175],
+			flags:{two_sided:true}
+		});
+		panel.texture = name; //assign canvas texture to node
+		this.scene.root.addChild(panel);
+
+		var video = document.getElementById(videoID);
+
+		video.addEventListener('play', function() {
+			var $this = this; //cache
+			(function loop() {
+			  if (!$this.paused && !$this.ended) {
+				subctx.drawImage($this, 0, 0, 1800, 1200);
+				setTimeout(loop, 1000 / 30); // drawing at 30fps
+				texture.uploadImage(subcanvas);
+			  }
+			})();
+		  }, 0);
 	},
 
 	createSubCanvasVideo: function()

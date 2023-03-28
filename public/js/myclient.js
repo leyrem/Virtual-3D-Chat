@@ -251,6 +251,10 @@ var MYCLIENT = {
 
             if(this.on_auth)
                 this.on_auth(data);
+        } else if (type == "PLAY_TV") {
+            document.getElementById("item-button").firstChild.data = "Click to play TV";
+            MYAPP.startItemAction(false);
+
         }
     },
 

@@ -21,6 +21,8 @@ const MYAPP = {
     myAvatar: 'girl',
     target_room: "",
     my_language: "en",
+    my_peer: null,
+    my_stream: null,
 
     init: function()
     {
@@ -182,7 +184,7 @@ const MYAPP = {
     {
     
       var success = null;
-      if (with_token == true) success = MYCLIENT.connect_with_token('localhost:9018');
+      if (with_token == true) success = MYCLIENT.connect_with_token('localhost:9019');
       if (with_token == true && success != true) return;
       if (with_token == true && success == true) {
         document.getElementById('login-page').style.display = 'none';
@@ -190,7 +192,7 @@ const MYAPP = {
       }
       if (with_token == false) MYCLIENT.connect('localhost:9019', roomName, userName, password, this.myAvatar, is_sign_up);
       // server.connect( 'localhost:1337', roomName, userName);
-      //MYCLIENT.connect('ecv-etic.upf.edu/node/9018/ws', roomName, userName, password, this.myUserSprite);
+      //MYCLIENT.connect('ecv-etic.upf.edu/node/9019/ws', roomName, userName, password, this.myUserSprite);
 
       MYCLIENT.on_connect = function( server ) {
         $('#bar-status').html(`Connected`);
@@ -499,6 +501,8 @@ const MYAPP = {
       var el = document.getElementById("item-button");
       if (name_item == "jukebox")
         el.firstChild.data = "Click to play music";
+      else if (name_item == "videoconf")
+        el.firstChild.data = "Click to play connect to WebCam";
       else if (name_item == "tv")  
         el.firstChild.data = "Click to play TV";
       document.getElementById('item-pop').style.display = 'block';
@@ -509,12 +513,25 @@ const MYAPP = {
       document.getElementById('item-pop').style.display = 'none';
     },
 
-    startItemAction: function()
+    startItemAction: function(send_msg)
     {
       if (document.getElementById("item-button").firstChild.data == "Click to play music")
         document.getElementById('music-panel').style.display = 'block';
-      else if (document.getElementById("item-button").firstChild.data == "Click to play TV")
-        document.getElementById('video').play();
+      else if (document.getElementById("item-button").firstChild.data == "Click to play TV") {
+        document.getElementById('video').play().catch( function(err) {
+          console.log("error on play: " + err );
+        });
+        if (send_msg) {
+          var msg = {type: "PLAY_TV"};
+			    if (MYCLIENT.on_connect != null) MYCLIENT.sendMessage(JSON.stringify(msg));
+        }
+      }
+      else if (document.getElementById("item-button").firstChild.data == "Click to play connect to WebCam") {
+        MYAPP.connectWebCam();
+        document.getElementById('video_webcam').play().catch(function(err){
+          console.log("error on play: " + err );
+        });
+      }
     },
     hideMusicPanel: function()
     {
@@ -557,8 +574,6 @@ const MYAPP = {
       document.getElementById('choose-avatar-page').style.display = 'block';
       document.getElementById('canvas-wrap').style.display = 'none';
       $('#avatar-select-button').click(function() {
-
-        
         WORLD_3D.removeUserNode(MYAPP.my_user_obj);
         MYAPP.my_user_obj.avatar = MYAPP.myAvatar;
         MYAPP.my_user_obj.current_anim = "idle_" + MYAPP.myAvatar;
@@ -626,10 +641,192 @@ const MYAPP = {
       }
     },
 
+    connectWebCam: function()
+    {
+      MYAPP.my_stream = null
+
+      var getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia).bind(navigator);
+      getUserMedia({video: true, audio: true}, function(stream) {
+        var video = document.getElementById("video_webcam");
+        video.srcObject = stream;
+        video.volume = 0; //avoid audio feedback
+        MYAPP.my_stream = stream;
+      }, function(err) {
+        console.log('Failed to get local stream' ,err);
+      });
+
+      MYAPP.my_peer = new Peer();
+
+      //to fetch id
+      MYAPP.my_peer.on('open', function(id) {
+        console.log('My peer ID is: ' + id);
+        alert("Your peer ID is: " + id);
+        //document.querySelector("div#key").innerText = "Your key is " + id;
+      });
+
+      //to receive incomming connections
+      MYAPP.my_peer.on('connection', function(conn) {
+        console.log("somebody connects to me!",conn);
+
+        conn.on('data', function(data) {
+          console.log('Received', data);
+        });
+      });
+
+      //incomming calls
+      MYAPP.my_peer.on('call', function(call) {
+        console.log("somebody calls me!",call);
+
+        call.answer( MYAPP.my_stream ); // Answer the call with an A/V stream.
+          call.on('stream', function(remoteStream) {
+            var video = document.getElementById("video_webcam_other");
+            video.srcObject = remoteStream;
+            document.getElementById('video_webcam_other').play().catch(function(err){
+              console.log("error on play: " + err );
+            });
+          });
+      });
+
+
+    },
+
+    connectToID: function(is_call, id)
+    {
+      var conn = null;
+      if (is_call == true && MYAPP.my_stream != null)
+        conn = MYAPP.my_peer.call( id, MYAPP.my_stream );
+      else if (MYAPP.my_stream != null)
+        conn = MYAPP.my_peer.connect( id, MYAPP.my_stream );
+
+      conn.on('open', function() {
+        // Receive messages
+        conn.on('data', function(data) {
+          console.log('Received', data);
+        });
+
+        // Send messages
+        conn.send('Hello!');
+      });
+
+      // if he answer my call, get his stream and show it
+      conn.on('stream', function(remoteStream) {
+        var video = document.getElementById("video_webcam_other");
+        video.srcObject = remoteStream;
+        document.getElementById('video_webcam_other').play().catch(function(err){
+          console.log("error on play: " + err );
+        });
+      });
+    },
+
   };  
 
 
-// https://codepen.io/junior-abd-almaged/pen/gQEbRv  --> on message received pass it trhough translate, detect autoamtica language?
+  
+  
 
-  
-  
+{/* <html>
+<head>
+	<script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+	<style>
+		
+		#toolbar div { display: inline-block; }
+	</style>
+</head>
+<body>
+<div>
+<h1>WebRTC</h1>
+<div id="toolbar">
+	<div id="key"></div>
+	<input />
+	<button onclick="javascript:connectToID();">CONNECT</button>
+	<button onclick="javascript:connectToID(true);">CALL</button>
+</div>
+<video id="me" autoplay width=400></video><video id="him" autoplay width=400></video>
+<div id="log"></div>
+</div>
+
+<script>
+
+var my_stream = null
+
+var getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+getUserMedia({video: true, audio: true}, function(stream) {
+	var video = document.querySelector("video#me");
+	video.srcObject = stream;
+	video.volume = 0; //avoid audio feedback
+	my_stream = stream;
+}, function(err) {
+  console.log('Failed to get local stream' ,err);
+});
+
+//var peer = new Peer();
+var peer = new Peer();
+
+//to fetch id
+peer.on('open', function(id) {
+  console.log('My peer ID is: ' + id);
+  document.querySelector("div#key").innerText = "Your key is " + id;
+});
+
+//connect to remote user
+function connectToID(is_call)
+{
+	var id = document.querySelector("input").value;
+	var conn = null;
+	if(is_call)
+		conn = peer.call( id, my_stream );
+	else
+		conn = peer.connect( id, my_stream );
+
+	conn.on('open', function() {
+		// Receive messages
+		conn.on('data', function(data) {
+			console.log('Received', data);
+			showMessage( data );
+		});
+
+		// Send messages
+		conn.send('Hello!');
+	});
+
+	// if he answer my call, get his stream and show it
+	conn.on('stream', function(remoteStream) {
+		var video = document.querySelector("video#him");
+		video.srcObject = remoteStream;
+	});
+}
+
+//to receive incomming connections
+peer.on('connection', function(conn) {
+	console.log("somebody connects to me!",conn);
+	showMessage( "somebody connects to me!" );
+
+	conn.on('data', function(data) {
+		console.log('Received', data);
+		showMessage( data );
+	});
+});
+
+//incomming calls
+peer.on('call', function(call) {
+	console.log("somebody calls me!",call);
+	showMessage( "somebody calls me!" );
+
+	call.answer( my_stream ); // Answer the call with an A/V stream.
+		call.on('stream', function(remoteStream) {
+		var video = document.querySelector("video#him");
+		video.srcObject = remoteStream;
+    });
+});
+
+function showMessage( msg )
+{
+	var elem = document.createElement("p");
+	elem.innerText = msg;
+	document.querySelector("#log").appendChild(elem);
+}
+
+
+</script>
+</body>
+</html> */}

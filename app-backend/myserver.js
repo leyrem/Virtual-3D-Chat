@@ -23,7 +23,7 @@ var MYSERVER = {
         console.log("Initializing server...");
 		// TODO:
 		// Tengo un world en servidor y un world en cliente y hay que manternerlos synchornized
-		const data = fs.readFileSync('../public-3D/js/world.json');
+		const data = fs.readFileSync('../public/js/world.json');
 		WORLD.fromJSON(JSON.parse(data));
 		console.log("Number of rooms: " + Object.keys( WORLD.rooms ).length);
 	},
@@ -256,6 +256,10 @@ var MYSERVER = {
 			WORLD.users[ws.user_name].current_anim = dat.anim;
 			WORLD.users[ws.user_name].rotation = dat.rot;
 
+		} 
+		else if(JSON.parse(msgReceived.msgData).type == "PLAY_TV")
+		{
+			this.sendToRoom(ws.room_name, ws.user_id.toString(), true, "PLAY_TV", msgReceived.msgData, null);
 		} 
 		else if(JSON.parse(msgReceived.msgData).type == "AVATAR_CHANGE")
 		{
