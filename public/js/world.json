@@ -54,14 +54,6 @@
                 {
                     "target": "conference",  
                     "position": [57, 0, -400]
-                },
-                {
-                    "target": "living_room",
-                    "position": [-30, 0, -400]
-                },
-                {
-                    "target": "living_room",
-                    "position": [33, 0, -272]
                 }
             ],
             "items": []

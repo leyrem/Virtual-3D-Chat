@@ -25,6 +25,7 @@ const MYAPP = {
     my_language: "en",
     my_peer: null,
     my_stream: null,
+    my_peer_conn: null,
 
     init: function()
     {
@@ -653,7 +654,7 @@ const MYAPP = {
       getUserMedia({video: true, audio: true}, function(stream) {
         var video = document.getElementById("video_webcam");
         video.srcObject = stream;
-        video.volume = 0; //avoid audio feedback
+        video.volume = 100; //avoid audio feedback
         MYAPP.my_stream = stream;
       }, function(err) {
         console.log('Failed to get local stream' ,err);
@@ -709,30 +710,31 @@ const MYAPP = {
       document.getElementById("toolbar-webcam").style.display = 'none';
       document.getElementById("key-webcam").innerHTML = "";
       MYAPP.my_peer.disconnect();
+      MYAPP.my_peer_conn.close();
       var video = document.getElementById("video_webcam_other").srcObject = null;
       var video = document.getElementById("video_webcam").srcObject = null;
     },
 
     connectToID: function(is_call, id)
     {
-      var conn = null;
+      MYAPP.my_peer_conn = null;
       if (is_call == true && MYAPP.my_stream != null)
-        conn = MYAPP.my_peer.call( id, MYAPP.my_stream );
+        MYAPP.my_peer_conn = MYAPP.my_peer.call( id, MYAPP.my_stream );
       else if (MYAPP.my_stream != null)
-        conn = MYAPP.my_peer.connect( id, MYAPP.my_stream );
+        MYAPP.my_peer_conn = MYAPP.my_peer.connect( id, MYAPP.my_stream );
 
-      conn.on('open', function() {
+      MYAPP.my_peer_conn.on('open', function() {
         // Receive messages
-        conn.on('data', function(data) {
+        MYAPP.my_peer_conn.on('data', function(data) {
           console.log('Received', data);
         });
 
         // Send messages
-        conn.send('Hello!');
+        MYAPP.my_peer_conn.send('Hello!');
       });
 
       // if he answer my call, get his stream and show it
-      conn.on('stream', function(remoteStream) {
+      MYAPP.my_peer_conn.on('stream', function(remoteStream) {
         console.log("Got hi sstream");
         var video = document.getElementById("video_webcam_other");
         video.srcObject = remoteStream;

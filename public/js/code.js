@@ -257,7 +257,7 @@ var WORLD_3D = {
 		
 			// Render walkable area
 			var vertices = WORLD_3D.current_room_walkarea.getVertices();
-			WORLD_3D.renderer.renderPoints( vertices, null, WORLD_3D.camera, null,null,null,gl.LINES );
+			//WORLD_3D.renderer.renderPoints( vertices, null, WORLD_3D.camera, null,null,null,gl.LINES );
 			//renderer.renderLines(vertices); // try and see if it works
 		}
 
@@ -540,7 +540,7 @@ var WORLD_3D = {
 		var items = WORLD_3D.current_room.items;
 		for(var i = 0; i < items.length; i ++)
 		{
-			if ((items[i].position[0] - 6) <= Math.round(pos[0]) &&  Math.round(pos[0]) <= (items[i].position[0] + 6) && (items[i].position[2] - 6) <= Math.round(pos[2]) &&  Math.round(pos[2]) <= (items[i].position[2] + 6) ) 
+			if ((items[i].position[0] - 20) <= Math.round(pos[0]) &&  Math.round(pos[0]) <= (items[i].position[0] + 20) && (items[i].position[2] - 20) <= Math.round(pos[2]) &&  Math.round(pos[2]) <= (items[i].position[2] + 20) ) 
 			{
 				//console.log("You are by door");
 				return [true, items[i].name];
