@@ -48,7 +48,7 @@ var MYCLIENT = {
             return;
         }
 
-        var protocol = "ws://";
+        var protocol = "wss://";
         var final_url = protocol + url + "/?room_name=" + room_name + "&user_name=" + user_name + "&password=" + password + "&avatar=" + spriteURL + "&is_sign_up=" + is_sign_up;
         this.socket = new WebSocket(final_url);
         this.socket.onopen = this.onOpen.bind(this); 
@@ -83,7 +83,7 @@ var MYCLIENT = {
         }
         console.log("Local storage token is: " + localStorage.token);
 
-        var protocol = "ws://";
+        var protocol = "wss://";
         var final_url = protocol + url + "/?my_token=" + localStorage.token;
         this.socket = new WebSocket(final_url);
         this.socket.onopen = this.onOpen.bind(this); 

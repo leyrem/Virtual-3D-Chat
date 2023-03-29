@@ -3,6 +3,8 @@ $.ajaxSetup({
   async: false
 });
 
+already_got = false;
+
 // Namespace that includes the whole functionality of the chat
 const MYAPP = {
 
@@ -184,13 +186,13 @@ const MYAPP = {
     {
     
       var success = null;
-      if (with_token == true) success = MYCLIENT.connect_with_token('localhost:9019');
+      if (with_token == true) success = MYCLIENT.connect_with_token('ecv-etic.upf.edu/node/9019/ws');
       if (with_token == true && success != true) return;
       if (with_token == true && success == true) {
         document.getElementById('login-page').style.display = 'none';
         document.getElementById('canvas-wrap').style.display = 'block';
       }
-      if (with_token == false) MYCLIENT.connect('localhost:9019', roomName, userName, password, this.myAvatar, is_sign_up);
+      if (with_token == false) MYCLIENT.connect('ecv-etic.upf.edu/node/9019/ws', roomName, userName, password, this.myAvatar, is_sign_up);
       // server.connect( 'localhost:1337', roomName, userName);
       //MYCLIENT.connect('ecv-etic.upf.edu/node/9019/ws', roomName, userName, password, this.myUserSprite);
 
@@ -527,10 +529,12 @@ const MYAPP = {
         }
       }
       else if (document.getElementById("item-button").firstChild.data == "Click to play connect to WebCam") {
+
         MYAPP.connectWebCam();
         document.getElementById('video_webcam').play().catch(function(err){
           console.log("error on play: " + err );
         });
+        document.getElementById("toolbar-webcam").style.display = 'block';
       }
     },
     hideMusicPanel: function()
@@ -661,6 +665,7 @@ const MYAPP = {
       MYAPP.my_peer.on('open', function(id) {
         console.log('My peer ID is: ' + id);
         alert("Your peer ID is: " + id);
+        document.getElementById("key-webcam").innerHTML = id;
         //document.querySelector("div#key").innerText = "Your key is " + id;
       });
 
@@ -679,15 +684,33 @@ const MYAPP = {
 
         call.answer( MYAPP.my_stream ); // Answer the call with an A/V stream.
           call.on('stream', function(remoteStream) {
-            var video = document.getElementById("video_webcam_other");
-            video.srcObject = remoteStream;
-            document.getElementById('video_webcam_other').play().catch(function(err){
-              console.log("error on play: " + err );
-            });
+            if (already_got == false) {
+              console.log("Got hi sstream");
+              var video = document.getElementById("video_webcam_other");
+              video.srcObject = remoteStream;
+              video.play().catch(function(err){
+                console.log("error on play: " + err );
+              });
+              already_got = true;
+            }
+            
           });
       });
+    },
 
-
+    clickCall: function()
+    {
+      var id = document.getElementById("another-user-key").value;
+      if (id == "") return;
+      MYAPP.connectToID(true, id);
+    },
+    disconnectCall: function()
+    {
+      document.getElementById("toolbar-webcam").style.display = 'none';
+      document.getElementById("key-webcam").innerHTML = "";
+      MYAPP.my_peer.disconnect();
+      var video = document.getElementById("video_webcam_other").srcObject = null;
+      var video = document.getElementById("video_webcam").srcObject = null;
     },
 
     connectToID: function(is_call, id)
@@ -710,9 +733,10 @@ const MYAPP = {
 
       // if he answer my call, get his stream and show it
       conn.on('stream', function(remoteStream) {
+        console.log("Got hi sstream");
         var video = document.getElementById("video_webcam_other");
         video.srcObject = remoteStream;
-        document.getElementById('video_webcam_other').play().catch(function(err){
+        video.play().catch(function(err){
           console.log("error on play: " + err );
         });
       });

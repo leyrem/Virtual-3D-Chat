@@ -176,9 +176,17 @@
 				</div>
 			</div>
 			<div id="item-pop" style="display: none;">
-				<button id="item-button" class="pop-buttons" role="button">
-					Click to interact with item
-				</button>
+				<div class="btn-group">
+					<button id="item-button">
+						Click to interact with item
+					</button>
+				</div>
+			</div>
+			<div id="toolbar-webcam" style="display:none;">
+				<div id="key-webcam"></div>
+				<input id="another-user-key" />
+				<button onclick="MYAPP.clickCall();">Call</button>
+				<button onclick="MYAPP.disconnectCall();">Disconnect</button>
 			</div>
 			<div class="music-popup" id="music-panel" style="display: none;">
 				<!-- <iframe 

@@ -47,6 +47,20 @@
   color: white;
 } */
 
+#toolbar-webcam {
+  position: absolute;
+  left: 33%;
+  bottom: 25%;
+  border-radius: 10px;
+  width: 200px; 
+  height: 100px; 
+  background-color: rgb(21, 27, 29,.7);
+  color: white;
+  font-family: sans-serif;
+  font-size: 12px;
+  padding: 2%;
+}
+
 #item-pop {
   position: absolute;
   left: 11%;
