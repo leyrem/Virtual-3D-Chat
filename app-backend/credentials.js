@@ -16,6 +16,7 @@ var DATABASE_MANAGER = {
 
     hash_password: function( passwd )
     {
+        if (!passwd) return;
         var hash = null;
         if( passwd.constructor === String )
             hash = crypto.createHash('md5').update(passwd).digest("hex");
