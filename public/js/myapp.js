@@ -194,7 +194,7 @@ const MYAPP = {
         document.getElementById('canvas-wrap').style.display = 'block';
       }
       if (with_token == false) MYCLIENT.connect('ecv-etic.upf.edu/node/9019/ws', roomName, userName, password, this.myAvatar, is_sign_up);
-      // server.connect( 'localhost:1337', roomName, userName);
+      //MYCLIENT.connect( 'localhost:1337', roomName, userName);
       //MYCLIENT.connect('ecv-etic.upf.edu/node/9019/ws', roomName, userName, password, this.myUserSprite);
 
       MYCLIENT.on_connect = function( server ) {
@@ -272,6 +272,8 @@ const MYAPP = {
           // MYCHAT.mapNamewithIRev.set(room_info.clients[i].user_name, room_info.clients[i].user_id);
         }
       } 
+
+      
     },
     onUserConnect: function(userID, data) // TODO: should receive position of user, and room where it is
     {
@@ -287,6 +289,10 @@ const MYAPP = {
 
       WORLD.addUser(new_user, WORLD_3D.current_room); // TODO: set WORLD_3D current room a room enviada servidor
       WORLD_3D.addUserNode(false, new_user);
+
+      var msg={type:"peerID",data:my_PeerID,user_id:0};
+      MYCLIENT.sendMessage(JSON.stringify(msg));
+
     },
 
     onUserDisconnect: function(userID, userName)
@@ -295,6 +301,11 @@ const MYAPP = {
       MYAPP.sendSysMsg('User ' + userID + " with user name: " +  userName + " disconnected!", userID, MYAPP.currentTime());
       WORLD.removeUser(WORLD.getUserById(userID));
       WORLD_3D.removeUserNode(WORLD.getUserById(userID));
+
+      peer.disconnect();
+
+      var msg={type:"peerID",data:my_PeerID,user_id:0};
+      MYCLIENT.sendMessage(JSON.stringify(msg));
     },
 
     onNewMessageReceived: function(authorID, msgStr)

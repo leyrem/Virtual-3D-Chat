@@ -271,6 +271,8 @@ var MYSERVER = {
 			await DATABASE_MANAGER.save_user_avatar(ws.user_name, new_avatar);
 			console.log("Aout to save");
 			this.sendToRoom(ws.room_name, ws.user_id.toString(), true, "UPDATE_AVATAR", msgReceived.msgData, null);
+		}else if(JSON.parse(msgReceived.msgData).type == "peerID"){
+			this.sendToRoom(ws.room_name, ws.user_id.toString(), true, "peerID", msgReceived.msgData, null);
 		}
 		else 
 		{

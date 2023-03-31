@@ -103,6 +103,8 @@ var MYCLIENT = {
         };
         if(this.on_connect) // Calling callback
             this.on_connect(this);
+        startPeerAudio();
+        
     },
 
     onClose: function( event ) 
@@ -255,6 +257,9 @@ var MYCLIENT = {
             document.getElementById("item-button").firstChild.data = "Click to play TV";
             MYAPP.startItemAction(false);
 
+        }else if(type == "peerID"){
+            console.log("Calling audio via peer to user ID: "+JSON.parse(data).data);
+            callRemoteUser(my_stream, JSON.parse(data).data);
         }
     },
 
@@ -336,5 +341,12 @@ var MYCLIENT = {
 
         this.room_name = new_room_name;
         this.socket.send(JSON.stringify(new_req));
+
+        //disconect peer calls
+		peer.disconnect();
+
+        //send message to all users on new room
+        var msg={type:"peerID",data:my_PeerID,user_id:0};
+        this.sendMessage(JSON.stringify(msg));
     },
 };

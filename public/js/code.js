@@ -31,6 +31,10 @@ var WORLD_3D = {
 
 	onWorldLoaded: function() 
 	{
+
+
+
+
 		//create the rendering context
 		WORLD_3D.context = GL.create({width: window.innerWidth, height:window.innerHeight});
 
@@ -80,6 +84,7 @@ var WORLD_3D = {
 		//console.log("Current room is: " + JSON.stringify(this.current_room));
 		WORLD_3D.addUserNode(true, MYAPP.my_user_obj);
 		this.init();
+		
    	},
 
 	loadAnimation:  function ( name, avatar, url )
@@ -463,7 +468,7 @@ var WORLD_3D = {
 
 		
 		console.log("Added node to world 3d on pos: " + user_obj.position + " , with avatar: " + user_obj.avatar);
-	},
+	}, 
 
 	changeRoom: function( current_room, new_room ) // new_room and current_room must be Room objects
 	{
@@ -504,6 +509,7 @@ var WORLD_3D = {
 				break;
 			}
 		}
+		
 
 		if (new_room.name == "living_room")
 		{
@@ -511,9 +517,12 @@ var WORLD_3D = {
 		}
 		if (new_room.name == "conference")
 		{
+			
 			WORLD_3D.createSubCanvasVideoWebCam('video_webcam', "subcanvas_webcam",[-40,45,-175]);
 			WORLD_3D.createSubCanvasVideoWebCam('video_webcam_other', "subcanvas_webcam_other",[40,45,-175]);
 		}
+			
+
 	},
 
 	isByDoor: function( pos )
