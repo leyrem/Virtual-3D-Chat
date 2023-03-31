@@ -654,8 +654,8 @@ const MYAPP = {
       getUserMedia({video: true, audio: true}, function(stream) {
         var video = document.getElementById("video_webcam");
         video.srcObject = stream;
-        video.volume = 100; //avoid audio feedback
         MYAPP.my_stream = stream;
+        video.volume = 100; //avoid audio feedback
       }, function(err) {
         console.log('Failed to get local stream' ,err);
       });
@@ -709,6 +709,7 @@ const MYAPP = {
     {
       document.getElementById("toolbar-webcam").style.display = 'none';
       document.getElementById("key-webcam").innerHTML = "";
+      location.reload();
       MYAPP.my_peer.disconnect();
       MYAPP.my_peer_conn.close();
       var video = document.getElementById("video_webcam_other").srcObject = null;
